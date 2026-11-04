@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#14305c">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Mini POS — Admin</title>
+<meta name="robots" content="noindex,nofollow">
+<!--
+=== ADMIN (pou ou menm, mèt platfòm lan) ===
+Paj sa a sèlman pou ou: li montre tout biznis yo epi li ba w posibilite aktive abònman yo.
+1. Kreye kont admin ou: enskri nòmalman sou site.html ak imèl ou.
+2. Firebase Console › Authentication › kopye UID kont ou a.
+3. Firestore › kreye koleksyon "admins" › dokiman ki gen ID = UID ou a (nenpòt chan, egzanp t: 1).
+4. Règ Firestore yo (nan tèt site.html) deja gen règ admin lan. Kole yo si w poko fè sa.
+5. Louvri admin.html, konekte, epi aktive abònman yo apre w resevwa prèv peman.
+=== Mòd demo: san konfigirasyon Firebase, bouton "Fè m admin (demo)" parèt pou w teste. ===
+-->
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+body{background:#f1f4f8;color:#1a2332;padding-bottom:30px}
+header{background:#14305c;color:#fff;padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+header b{font-size:1.1rem}.hr{display:flex;gap:8px;align-items:center}
+.lang{display:inline-flex;border:1px solid #6ea8fe;border-radius:4px;overflow:hidden}
+.lang button{background:none;border:0;color:#fff;padding:3px 9px;font-size:.75rem;font-weight:700;cursor:pointer}
+.lang button+button{border-left:1px solid #6ea8fe}.lang .on{background:#2f6fd6}
+.out{background:none;border:1px solid #6ea8fe;color:#fff;border-radius:4px;padding:3px 10px;cursor:pointer;font-size:.8rem}
+.tabs{display:flex;overflow-x:auto;background:#fff;border-bottom:1px solid #dbe2ec;position:sticky;top:0;z-index:5}
+.tabs button{flex:1;min-width:90px;padding:12px 8px;border:0;background:none;font-weight:700;color:#556;cursor:pointer;border-bottom:3px solid transparent}
+.tabs .on{color:#14305c;border-color:#27ae60}
+main{max-width:980px;margin:12px auto;padding:0 10px}
+.card{background:#fff;border-radius:10px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px #0001}
+h2,h3{margin-bottom:8px}label{display:block;font-size:.82rem;color:#556;margin:9px 0 3px}
+input,select{width:100%;padding:10px;border:1px solid #cbd5e0;border-radius:6px;font-size:1rem}
+.btn{background:#27ae60;color:#fff;border:0;border-radius:8px;padding:11px 14px;font-weight:700;cursor:pointer;width:100%;margin-top:10px;font-size:1rem}
+.btn.s{background:#2f6fd6}.btn.d{background:#c0392b}.btn.g{background:#718096}
+.sm{width:auto;padding:5px 10px;font-size:.82rem;margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.pt{background:#fff;border:1px solid #dbe2ec;border-radius:10px;padding:10px;text-align:left;cursor:pointer}
+.pt:active{background:#eaf6ee}.pt.z{opacity:.45}.pt b{display:block;font-size:.92rem}.pt i{font-style:normal;color:#27ae60;font-weight:700}.pt small{color:#718096;display:block}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #edf0f4;flex-wrap:wrap}
+.mut{color:#718096;font-size:.88rem}.err{color:#c0392b;font-weight:700;margin-top:8px}.ok{color:#27ae60;font-weight:700;margin-top:8px}
+.low{color:#c0392b;font-weight:700}.tot{font-size:1.3rem;font-weight:800}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px}.kp div{background:#fff;border-radius:10px;padding:12px;text-align:center}.kp b{display:block;font-size:1.15rem;color:#14305c}
+.q{display:inline-flex;align-items:center;gap:6px}.q button{width:28px;height:28px;border-radius:6px;border:1px solid #cbd5e0;background:#fff;font-size:1rem;cursor:pointer}
+#rc{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:14px;z-index:20}
+#rc .p{background:#fff;border-radius:10px;padding:16px;max-width:340px;width:100%;max-height:92vh;overflow:auto;font:14px/1.4 "Courier New",monospace}
+#rc .c{text-align:center}#rc hr{border:0;border-top:1px dashed #000;margin:8px 0}#rc .l{display:flex;justify-content:space-between;gap:8px}
+#rc .no{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}#rc .no .btn{margin-top:0;padding:10px 6px;font-size:.9rem}
+@media print{body>*:not(#rc){display:none!important}#rc{position:static;background:none;display:block!important}#rc .no{display:none}}
+</style>
+</head>
+<body>
+<header><b>Mini POS — Admin</b><div class="hr"><div class="lang"><button id="lf" onclick="setLang('fr')">FR</button><button id="lh" onclick="setLang('ht')">HT</button></div><span id="ho"></span></div></header>
+<main id="app"></main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const FB={apiKey:"AIzaSyAJsXEXqL_aS5G79wTKyS30NCe0KAjeoQc",authDomain:"blanco-point-de-vente.firebaseapp.com",projectId:"blanco-point-de-vente",storageBucket:"blanco-point-de-vente.firebasestorage.app",messagingSenderId:"946666877414",appId:"1:946666877414:web:51c28bfbf2d3d80f67a627"}; // menm konfigirasyon ak site.html
+const demo=String(FB.apiKey).startsWith('COLLE'),DAY=864e5;
+const D={login:['Konekte','Se connecter'],signup:['Kreye kont (demo)','Créer un compte (démo)'],email:['Imèl','E-mail'],pass:['Modpas','Mot de passe'],bad:['Imèl oswa modpas pa bon.','E-mail ou mot de passe incorrect.'],logout:['Soti','Quitter'],
+notAdmin:['Kont sa a pa admin. Kreye dokiman admins/UID nan Firebase (gade tèt fichye a).','Ce compte n’est pas admin. Créez le document admins/UID dans Firebase (voir le haut du fichier).'],makeAdmin:['Fè m admin (demo)','Me rendre admin (démo)'],
+nofb:['Firebase pa ka chaje. Sa rive lè w louvri paj la nan yon previzyalizasyon (tankou andedan aplikasyon Claude) oswa san entènèt. Depoze l sou Netlify epi louvri l nan Chrome.','Firebase ne se charge pas. Cela arrive dans un aperçu (comme dans l’application Claude) ou sans internet. Déployez sur Netlify puis ouvrez la page dans Chrome.'],
+fsDown:['Pa ka rive nan Firestore. Verifye ke baz la kreye (Firestore Database › Create database) epi ke entènèt la bon.','Impossible de joindre Firestore. Vérifiez que la base est créée (Firestore Database › Create database) et que la connexion est bonne.'],
+rulesMsg:['Firestore refize aksè. Piblye règ yo (Firestore › Rules › Publish).','Firestore refuse l’accès. Publiez les règles (Firestore › Rules › Publish).'],
+noDb:['Baz Firestore a poko kreye (Firestore Database › Create database).','La base Firestore n’est pas créée (Firestore Database › Create database).'],
+install:['Enstale','Installer'],
+total:['Biznis','Commerces'],trial:['Esè','Essai'],paid:['Peye','Abonnés'],expired:['Fini','Expirés'],search:['Chèche biznis...','Rechercher...'],created:['Kreye','Créé'],until:['Jiska','Jusqu’au'],days:['jou','jours'],
+block:['Bloke','Bloquer',delete',suprimé],giveTrial:['Esè +15 jou','Essai +15 jours'],none:['Anyen pou kounye a.','Rien pour le moment.'],err:['Erè: ','Erreur : '],pend:['Ap tann','En attente'],req:['Demann peman','Demande de paiement'],act:['Aktive','Activer'],stT:['Esè gratis','Essai gratuit'],stP:['Abònman aktif','Abonnement actif'],stE:['Fini','Expiré'],demoN:['🧪 Mòd demo: done yo sove sèlman nan navigatè sa a.','🧪 Mode démo : données enregistrées uniquement dans ce navigateur.']};
+const ls=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}};
+let lang=ls('mp_lang')==='fr'?'fr':'ht';const t=k=>(D[k]||[k,k])[lang==='fr'?1:0],$=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const dd=x=>x?new Date(x).toLocaleDateString(lang==='fr'?'fr-FR':'fr-HT'):'—';
+let ip=null,fp=false,db,au,user=null,isAdm=false,shops=[],q='',err='',stage='boot',un=[],mode='login';
+/* ---------- diagnostic des erreurs Firebase ---------- */
+function authErr(x){
+  const c=(x&&x.code)||'',m={
+   'auth/operation-not-allowed':['Email/Password pa aktive nan Firebase (Authentication › Sign-in method).','Email/Password n’est pas activé dans Firebase (Authentication › Sign-in method).'],
+   'auth/unauthorized-domain':['Domèn sa a pa nan Authorized domains (Authentication › Settings).','Ce domaine n’est pas dans Authorized domains (Authentication › Settings).'],
+   'auth/invalid-api-key':['Kle API Firebase la pa bon. Verifye konfigirasyon an.','Clé API Firebase invalide. Vérifiez la configuration.'],
+   'auth/api-key-not-valid':['Kle API Firebase la pa bon. Verifye konfigirasyon an.','Clé API Firebase invalide. Vérifiez la configuration.'],
+   'auth/network-request-failed':['Pa gen koneksyon entènèt, oswa Firebase bloke.','Pas de connexion internet, ou Firebase est bloqué.'],
+   'auth/email-already-in-use':['Imèl sa a gen yon kont deja. Konekte.','Cet e-mail a déjà un compte. Connectez-vous.'],
+   'auth/weak-password':['Modpas la dwe gen omwen 6 karaktè.','Le mot de passe doit avoir au moins 6 caractères.'],
+   'auth/invalid-email':['Imèl la pa valid.','E-mail invalide.'],
+   'auth/too-many-requests':['Twòp esè. Tann yon ti moman epi eseye ankò.','Trop de tentatives. Patientez puis réessayez.']}[c];
+  return (m?m[lang==='fr'?1:0]:t('bad'))+(c?' ('+c+')':'')}
+function fsErr(e){
+  const c=(e&&e.code)||'',m=String((e&&e.message)||'');
+  if(c==='permission-denied')return t('rulesMsg')+' ('+c+')';
+  if(c==='not-found'||/does not exist|NOT_FOUND/i.test(m))return t('noDb')+' ('+(c||'not-found')+')';
+  if(c==='unavailable')return t('fsDown')+' ('+c+')';
+  return t('err')+m}
+
+function setLang(l){lang=l;ls('mp_lang',l);draw()}
+function st(s){const n=Date.now(),te=s.trialEnd!=null?s.trialEnd:((s.t||n)+15*DAY),pe=s.paidUntil||0;return pe>n?{k:'p',end:pe}:te>n?{k:'t',end:te}:{k:'e',end:Math.max(te,pe)}}
+function draw(){
+  if(window.NOFB){$('app').innerHTML=`<div class="card err">${t('nofb')}</div>`;return}
+  document.documentElement.lang=lang;$('lf').className=lang==='fr'?'on':'';$('lh').className=lang==='ht'?'on':'';
+  $('ho').innerHTML=(ip?`<button class="out" onclick="inst()">📲 ${t('install')}</button>`:'')+(user?`<button class="out" onclick="au.signOut()">${t('logout')}</button>`:'');
+  const dn=demo?`<div class="card" style="background:#fff8e1"><p style="font-size:.88rem">${t('demoN')}</p></div>`:'';
+  let h='';
+  if(stage==='boot')h='<div class="card mut">…</div>';
+  else if(!user)h=`<div class="card"><label>${t('email')}</label><input id="em" type="email"><label>${t('pass')}</label><input id="pw" type="password">${err?`<p class="err">${esc(err)}</p>`:''}<button class="btn" onclick="doAuth(false)">${t('login')}</button>${demo?`<button class="btn g" onclick="doAuth(true)">${t('signup')}</button>`:''}</div>`;
+  else if(!isAdm)h=`<div class="card"><p class="err">${t('notAdmin')}</p>${err?`<p class="err">${esc(err)}</p>`:''}<p class="mut" style="margin:6px 0">UID: ${esc(user.uid)}</p>${demo?`<button class="btn" onclick="makeAdmin()">${t('makeAdmin')}</button>`:''}</div>`;
+  else{
+    const A=shops.map(s=>({...s,_s:st(s)})),c=k=>A.filter(x=>x._s.k===k).length,ql=q.toLowerCase(),P=A.filter(x=>x.payReq).length;
+    const L=A.filter(s=>(!fp||s.payReq)&&(!ql||((s.name||'')+' '+(s.ownerEmail||'')+' '+s.id).toLowerCase().includes(ql))).sort((a,b)=>(!!b.payReq-!!a.payReq)||(b.t||0)-(a.t||0));
+    h=`<div class="kp"><div><b>${A.length}</b>${t('total')}</div><div><b>${c('t')}</b>${t('trial')}</div><div><b class="ok">${c('p')}</b>${t('paid')}</div><div><b class="low">${c('e')}</b>${t('expired')}</div><div><b style="color:#d69e2e">${P}</b>${t('pend')}</div></div>
+    <div class="card"><input placeholder="${t('search')}" value="${esc(q)}" oninput="q=this.value;draw()" id="sq"><button class="btn ${fp?'':'g'} sm" style="margin-top:8px" onclick="fp=!fp;draw()">${t('pend')} (${P})</button></div>
+    ${L.map(s=>`<div class="card"><div class="row" style="border:0"><span><b>${esc(s.name||s.id)}</b><br><span class="mut">${esc(s.ownerEmail||'')} · ${esc(s.id)}<br>${t('created')}: ${dd(s.t)}</span></span>
+      <span style="text-align:right"><b class="${s._s.k==='e'?'low':'ok'}">${s._s.k==='p'?t('stP'):s._s.k==='t'?t('stT'):t('stE')}</b><br><span class="mut">${t('until')} ${dd(s._s.end)}</span></span></div>
+      ${s.payReq?`<div class="box" style="background:#fffbea;border-color:#d69e2e">💰 ${t('req')}: <b>${esc(s.payReq.name)}</b> · ${s.payReq.price} HTG · ${dd(s.payReq.t)} <button class="btn sm" style="margin-left:6px" onclick="ext('${s.id}',${s.payReq.days})">✅ ${t('act')} ${s.payReq.days} ${t('days')}</button></div>`:''}
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><button class="btn sm" onclick="ext('${s.id}',30)">+30 ${t('days')}</button><button class="btn sm" onclick="ext('${s.id}',90)">+90</button><button class="btn sm" onclick="ext('${s.id}',365)">+365</button>
+      <button class="btn s sm" onclick="giveTrial('${s.id}')">${t('giveTrial')}</button><button class="btn d sm" onclick="blk('${s.id}')">${t('block')}</button></div></div>`).join('')||`<p class="mut">${t('none')}</p>`}`}
+  const f=document.activeElement&&document.activeElement.id==='sq';$('app').innerHTML=dn+h;if(f){const e=$('sq');e.focus();e.setSelectionRange(e.value.length,e.value.length)}}
+const upd=(id,d)=>db.doc('shops/'+id).update(d).catch(e=>{err=t('err')+e.message;draw()});
+function ext(id,n){const s=shops.find(x=>x.id===id);upd(id,{paidUntil:Math.max(Date.now(),s.paidUntil||0)+n*DAY,payReq:null})}
+function giveTrial(id){upd(id,{trialEnd:Date.now()+15*DAY})}
+function blk(id){upd(id,{paidUntil:0,trialEnd:0,payReq:null})}
+async function makeAdmin(){await db.doc('admins/'+user.uid).set({t:Date.now()});loadShop()}
+async function doAuth(su){err='';const e=$('em').value.trim(),p=$('pw').value;try{su?await au.createUserWithEmailAndPassword(e,p):await au.signInWithEmailAndPassword(e,p)}catch(x){err=authErr(x);draw()}}
+function stop(){un.forEach(f=>f());un=[];shops=[];isAdm=false}
+async function loadShop(){stop();try{const a=await db.doc('admins/'+user.uid).get();isAdm=a.exists;stage='ok';if(isAdm)un.push(db.collection('shops').onSnapshot(s=>{shops=s.docs.map(d=>({...d.data(),id:d.id}));draw()}))}catch(e){stage='ok';err=fsErr(e)}draw()}
+function localBackend(){
+  let S={},L=[],cb=null,cur=null;
+  try{S=JSON.parse(localStorage.getItem('mp_demo')||'{}');cur=JSON.parse(localStorage.getItem('mp_demo_cur')||'null')}catch(e){}
+  addEventListener('storage',e=>{if(e.key==='mp_demo'){try{S=JSON.parse(e.newValue||'{}')}catch(_){S={}}L.slice().forEach(f=>f())}});
+  const save=()=>{try{localStorage.setItem('mp_demo',JSON.stringify(S))}catch(e){}},fire=()=>{save();setTimeout(()=>L.slice().forEach(f=>f()),0)};
+  const put=(p,d,keep)=>{const o=keep?(S[p]||{}):{};for(const k in d){const v=d[k];o[k]=(v&&v.__inc!==undefined)?(o[k]||0)+v.__inc:v}S[p]=o};
+  const cp=o=>JSON.parse(JSON.stringify(o)),snap=p=>({exists:!!S[p],data:()=>S[p]?cp(S[p]):undefined});
+  const sub=(f,get)=>{const r=()=>f(get());L.push(r);r();return()=>{L=L.filter(x=>x!==r)}};
+  const dref=p=>({path:p,get:async()=>snap(p),set:async d=>{put(p,d);fire()},update:async d=>{if(!S[p])throw new Error('Not found');put(p,d,1);fire()},delete:async()=>{delete S[p];fire()},onSnapshot:f=>sub(f,()=>snap(p))});
+  const cref=(path,fl)=>{const rows=()=>{const re=new RegExp('^'+path+'/[^/]+$');return Object.keys(S).filter(k=>re.test(k)&&(!fl||S[k][fl[0]]===fl[1])).map(k=>({id:k.split('/').pop(),data:()=>cp(S[k])}))};
+    return{doc:id=>dref(path+'/'+id),add:async d=>{const id='p'+Math.random().toString(36).slice(2,9);put(path+'/'+id,d);fire();return{id}},where:(f,o,v)=>cref(path,[f,v]),orderBy:()=>cref(path,fl),limit:()=>cref(path,fl),onSnapshot:f=>sub(f,()=>({docs:rows()}))}};
+  const setCur=u=>{cur=u;try{localStorage.setItem('mp_demo_cur',JSON.stringify(u))}catch(e){}if(cb)cb(u)};
+  const mk=(e,p)=>{e=String(e).toLowerCase().trim();if(!/\S+@\S+\.\S+/.test(e))throw{code:'auth/invalid-email'};if(String(p).length<6)throw{code:'auth/weak-password'};if(S['_auth/'+e])throw{code:'auth/email-already-in-use'};
+    const u={uid:'u'+Math.random().toString(36).slice(2,11),email:e};S['_auth/'+e]={uid:u.uid,pw:p};save();return u};
+  const auth={onAuthStateChanged:f=>{cb=f;setTimeout(()=>f(cur),0)},
+    createUserWithEmailAndPassword:async(e,p)=>{const u=mk(e,p);setCur(u);return{user:u}},createOnly:async(e,p)=>mk(e,p).uid,
+    signInWithEmailAndPassword:async(e,p)=>{e=String(e).toLowerCase().trim();const a=S['_auth/'+e];if(!a||a.pw!==p)throw{code:'auth/invalid-credential'};const u={uid:a.uid,email:e};setCur(u);return{user:u}},
+    signOut:async()=>setCur(null),sendPasswordResetEmail:async()=>{}};
+  const db={doc:dref,collection:p=>cref(p),batch:()=>{const ops=[],b={set:(r,d)=>(ops.push(()=>put(r.path,d)),b),update:(r,d)=>(ops.push(()=>put(r.path,d,1)),b),delete:r=>(ops.push(()=>{delete S[r.path]}),b),commit:async()=>{ops.forEach(f=>f());fire()}};return b}};
+  return{db,auth,fv:{increment:n=>({__inc:n})}}}
+
+if(demo){const B=localBackend();db=B.db;au=B.auth}else if(typeof firebase==='undefined'){window.NOFB=true;draw()}
+else{firebase.initializeApp(FB);db=firebase.firestore();au=firebase.auth()}
+if(au)au.onAuthStateChanged(u=>{user=u;if(u){stage='boot';draw();loadShop()}else{stop();stage='out';draw()}});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;draw()});
+addEventListener('appinstalled',()=>{ip=null;draw()});
+function inst(){if(ip){ip.prompt();ip=null;draw()}}
+if('serviceWorker' in navigator&&/^https?:/.test(location.protocol))addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
