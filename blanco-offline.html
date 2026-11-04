@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blanco Multi_services — Sistèm Vant</title>
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#14213d;--mut:#667085;--line:#dde2ec;--pri:#14305c;--onpri:#fff;--acc:#f2b705;--ok:#13795b;--bad:#c0392b;--warn:#b26a00;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1624;--card:#18223a;--ink:#eef1f7;--mut:#9aa6bd;--line:#2a3652;--pri:#f2b705;--onpri:#14213d;--acc:#f2b705;--ok:#4cd0a2;--bad:#ff7b6b;--warn:#ffb84d}}
+:root[data-theme="dark"]{--bg:#0f1624;--card:#18223a;--ink:#eef1f7;--mut:#9aa6bd;--line:#2a3652;--pri:#f2b705;--onpri:#14213d;--acc:#f2b705;--ok:#4cd0a2;--bad:#ff7b6b;--warn:#ffb84d}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 Figtree,system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+header{background:var(--pri);color:var(--onpri);padding:14px 16px;display:flex;align-items:center;gap:10px}header img{height:42px;width:42px;object-fit:contain;background:#fff;border-radius:8px}
+header b{font-size:20px;font-weight:800;letter-spacing:.2px}header span{display:block;font-size:13px;opacity:.8}
+main{max-width:720px;margin:0 auto;padding:12px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;background:var(--card);border-bottom:1px solid var(--line);padding:6px}
+nav{flex-wrap:wrap;gap:4px}nav button{flex:1 0 22%;border:0;background:none;color:var(--mut);font:600 13px Figtree,system-ui,sans-serif;white-space:nowrap;padding:9px 4px;border-radius:10px}
+nav button.on{background:var(--pri);color:var(--onpri)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+h2{font-size:18px;margin:4px 0 10px}h3{font-size:15px;margin:0 0 8px}
+input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;margin-bottom:8px}
+label{font-size:13px;color:var(--mut);display:block;margin-bottom:2px}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.row>.fit{flex:0 0 auto}
+.btn{border:0;border-radius:10px;padding:11px 14px;font:700 15px Figtree,system-ui,sans-serif;background:var(--pri);color:var(--onpri);width:100%}
+.btn.sm{width:auto;padding:7px 11px;font-size:13px}.btn.alt{background:var(--bg);color:var(--ink);border:1px solid var(--line)}.btn.bad{background:var(--bad);color:#fff}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}.item small{color:var(--mut);display:block}
+.prod{width:100%;text-align:left;background:none;border:0;color:inherit;font:inherit;display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.prod:disabled{opacity:.4}
+.tag{font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.ok{color:var(--ok)}.low{color:var(--warn)}.out{color:var(--bad)}
+.total{display:flex;justify-content:space-between;font-size:22px;font-weight:800;margin:10px 0}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}.stat small{color:var(--mut)}.stat b{display:block;font-size:20px}
+.qty{display:flex;align-items:center;gap:8px}.qty button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:18px}
+.empty{color:var(--mut);text-align:center;padding:18px 0}
+#ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9;overflow:auto;padding:16px}
+#rc{background:#fff;color:#000;max-width:300px;margin:0 auto 12px;padding:14px;font:13px/1.35 'Courier New',monospace}
+#rc h4{text-align:center;margin:0 0 4px;font-size:1.2em}#rc .c{text-align:center}#rc hr{border:0;border-top:1px dashed #000;margin:6px 0}
+#rc .l{display:flex;justify-content:space-between;gap:6px}
+.acts{max-width:300px;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+@media print{body>*:not(#ov){display:none!important}#ov{display:block!important;position:static;background:none;padding:0}.acts{display:none}#rc{margin:0;max-width:100%}}
+</style>
+</head>
+<body>
+<header id="hd"></header>
+<div id="sync" style="display:none;padding:6px 12px;font-size:13px;font-weight:700;background:#b26a00;color:#fff;text-align:center"></div>
+<nav id="nav"></nav>
+<main id="app"></main>
+<div id="ov"><div id="rc"></div><div class="acts"><button class="btn" style="background:#25d366;color:#0b3d1d" onclick="waOpen()">Voye sou WhatsApp</button><button class="btn" onclick="btPrint()">Imprimer (Bluetooth)</button><div id="bts" style="color:#fff;text-align:center;font-size:13px"></div><button class="btn alt" onclick="saveRc()">Sove reçu a (imaj)</button><button class="btn alt" onclick="btSettings()">Paramèt Bluetooth telefòn lan</button><button class="btn alt" onclick="closeRc()">Fèmen</button></div></div>
+<script>
+const K='blanco_pos_v1';let db={products:[],sales:[],seq:1};
+try{const s=localStorage.getItem(K);if(s)db=JSON.parse(s)}catch(e){}
+db.cfg=Object.assign({name:'Blanco Multi_services',phone:'',address:'',footer:'Mèsi, tounen vini ankò!',logo:'',pin:'',paper:32},db.cfg||{});
+db.staff=db.staff||[];db.clients=db.clients||{};
+if(!db.cfg.lang){db.cfg.lang='fr';if(db.cfg.footer==='Mèsi, tounen vini ankò!')db.cfg.footer='Merci, revenez nous voir !';try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}}
+let ch=0;db.staff.forEach(x=>{if(!x.code){let c;do{c=String(1000+Math.floor(Math.random()*9000))}while(c===db.cfg.pin||db.staff.some(y=>y.code===c));x.code=c;ch=1}});if(ch)try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>(+n||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' HTG';
+const dt=t=>new Date(t).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'});
+let tab='vant',cart={},q='',editId=null,client='',pay='Kach',per='day',delId=null,seller='',voidId=null,user=null,rs='',cphone='',hq='',hd='',hlim=30,waNo=null,wq='',wph='';
+const TABS=[['vant','Vant'],['cli','Kliyan'],['pwodwi','Pwodwi'],['inv','Inventè'],['rap','Rapò'],['ist','Istorik'],['wa','WhatsApp'],['admin','Admin']];
+function go(t){tab=t;delId=null;msg='';voidId=null;sdId=null;seId=null;if(t!=='admin')unlocked=false;render()}
+function render(){
+ const need=db.staff.length&&!user;if(need){hdr();$('nav').innerHTML='';$('app').style.zoom=1;$('app').innerHTML=vLogin();return}
+ const T=user&&user!=='owner'?TABS.filter(t=>t[0]==='vant'||t[0]==='ist'||t[0]==='wa'):TABS;if(!T.some(t=>t[0]===tab))tab='vant';
+ $('nav').innerHTML=T.map(([k,v])=>`<button class="${k===tab?'on':''}" onclick="go('${k}')">${v}</button>`).join('');
+ hdr();$('app').style.zoom=[.9,1,1.15,1.3][db.cfg.uiSize??1];$('app').innerHTML={vant:vVant,pwodwi:vProd,inv:vInv,rap:vRap,ist:vHist,wa:vWa,cli:vCli,admin:vAdmin}[tab]();
+}
+const stTag=p=>p.qty<=0?'<span class="tag out">Fini</span>':p.qty<=(p.min??5)?`<span class="tag low">Ba · ${p.qty}</span>`:`<span class="tag ok">${p.qty}</span>`;
+/* VANT */
+function vVant(){
+ const list=db.products.filter(p=>p.name.toLowerCase().includes(q.toLowerCase()));
+ const ids=Object.keys(cart);let tot=0;
+ const lines=ids.map(id=>{const p=db.products.find(x=>x.id==id);if(!p)return'';tot+=p.price*cart[id];
+  return `<div class="item"><div>${esc(p.name)}<small id="sl${id}">${money(p.price)} × ${cart[id]} = ${money(p.price*cart[id])}</small></div><div class="qty"><button onclick="chg(${id},-1)">−</button><input type="number" inputmode="numeric" min="1" max="${p.qty}" value="${cart[id]}" onfocus="this.select()" oninput="qtyInput(${id},this)" onchange="qtyDone(${id},this)" style="width:72px;text-align:center;margin:0;padding:7px"><button onclick="chg(${id},1)">+</button></div></div>`}).join('');
+ return `<div class="card"><h2>Nouvo vant</h2><input id="q" placeholder="Chèche yon pwodwi…" value="${esc(q)}" oninput="q=this.value;keep()">
+ <div id="pl">${plist(list)}</div></div>
+ <div class="card"><h3>Panye</h3>${lines||'<div class="empty">Panye a vid. Tape sou yon pwodwi pou ajoute l.</div>'}
+ <div class="total"><span>Total</span><span id="ct">${money(tot)}</span></div>
+ <label>Non kliyan (opsyonèl)</label><input id="cn" list="cl-n" autocomplete="off" value="${esc(client)}" oninput="client=this.value;cliHint()" onchange="cliPick(this.value)">
+ <label>Nimewo WhatsApp kliyan (opsyonèl)</label><input id="cp" list="cl-p" type="tel" inputmode="tel" placeholder="509 …" value="${esc(cphone)}" oninput="cphone=this.value;cliHint()" onchange="cliPick(this.value)"><datalist id="cl-n">${clOpts('n')}</datalist><datalist id="cl-p">${clOpts('p')}</datalist><div id="cih" style="font-size:13px;color:var(--mut);margin:-2px 0 8px">${cliHintText()}</div>
+ ${user&&user!=='owner'?`<p style="margin:0 0 8px;color:var(--mut)">Vandè: <b style="color:var(--ink)">${esc(user.name)}</b></p>`:''}${db.staff.length&&user==='owner'?`<label>Vandè</label><select onchange="seller=this.value"><option value="">—</option>${db.staff.map(x=>`<option ${x.name===seller?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`:''}<label>Peman</label><select onchange="pay=this.value;render()">${['Kach','MonCash','Natcash','Kredi'].map(x=>`<option value="${x}" ${x===pay?'selected':''}>${x}</option>`).join('')}</select>
+ ${calcHtml(ids.length)}<button class="btn" onclick="sell()" ${ids.length?'':'disabled style="opacity:.5"'}>Konfime vant</button></div>`}
+const plist=l=>l.length?l.map(p=>`<button class="prod" ${p.qty<=0?'disabled':''} onclick="add(${p.id})"><span>${esc(p.name)}<small style="display:block;color:var(--mut)">${money(p.price)}</small></span>${stTag(p)}</button>`).join(''):'<div class="empty">Pa gen pwodwi. Ale nan "Pwodwi" pou ajoute yo.</div>';
+function keep(){$('pl').innerHTML=plist(db.products.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())))}
+function add(id){const p=db.products.find(x=>x.id==id);if((cart[id]||0)<p.qty)cart[id]=(cart[id]||0)+1;else alert('Pa gen plis stòk pou '+p.name);render()}
+function qtyInput(id,el){
+ const p=db.products.find(x=>x.id==id);if(!p)return;
+ let n=parseInt(el.value);if(isNaN(n)||n<1)return;
+ if(n>p.qty){n=p.qty;el.value=n;alert('Pa gen plis stòk pou '+p.name)}
+ cart[id]=n;updCart(id,p)}
+function qtyDone(id,el){const n=parseInt(el.value);if(isNaN(n)||n<1){delete cart[id];render()}else el.value=cart[id]}
+function updCart(id,p){
+ const s=document.getElementById('sl'+id);if(s)s.textContent=money(p.price)+' × '+cart[id]+' = '+money(p.price*cart[id]);
+ let t=0;Object.keys(cart).forEach(k=>{const q=db.products.find(x=>x.id==k);if(q)t+=q.price*cart[k]});
+ const e=document.getElementById('ct');if(e)e.textContent=money(t);const gc=document.getElementById('gc');if(gc)gc.innerHTML=changeHtml(t)}
+let given='';
+const curTot=()=>{let t=0;Object.keys(cart).forEach(k=>{const q=db.products.find(x=>x.id==k);if(q)t+=q.price*cart[k]});return t};
+function changeHtml(tt){const g=parseFloat(given);if(given===''||isNaN(g))return '';const d=g-tt;return d>=0?'<span class="ok">Balans pou remèt: '+money(d)+'</span>':'<span style="color:var(--bad)">Manke: '+money(-d)+'</span>'}
+function setGiven(v,btn){given=String(v);if(btn){const e=document.getElementById('gv');if(e)e.value=given}const c=document.getElementById('gc');if(c)c.innerHTML=changeHtml(curTot())}
+function calcHtml(n){return pay==='Kach'&&n?`<div style="margin:8px 0 10px;padding:10px;border:1px dashed var(--line);border-radius:10px"><label style="margin-top:0">Kliyan bay (HTG)</label><input id="gv" type="number" inputmode="decimal" min="0" value="${esc(given)}" oninput="setGiven(this.value)" placeholder="0"><div class="row" style="flex-wrap:wrap;gap:6px;margin-bottom:6px">${[50,100,250,500,1000].map(v=>`<button class="btn sm alt" style="flex:0 0 auto" onclick="setGiven(${v},1)">${v}</button>`).join('')}<button class="btn sm alt" style="flex:0 0 auto" onclick="setGiven(curTot(),1)">Egzak</button></div><div id="gc" style="font-weight:800;font-size:18px">${changeHtml(curTot())}</div></div>`:''}
+function chg(id,d){const p=db.products.find(x=>x.id==id);const n=(cart[id]||0)+d;if(n<=0)delete cart[id];else if(n<=p.qty)cart[id]=n;render()}
+function sell(){
+ const items=Object.keys(cart).map(id=>{const p=db.products.find(x=>x.id==id);return{id:p.id,name:p.name,price:p.price,cost:p.cost||0,qty:cart[id]}});
+ if(!items.length)return;
+ items.forEach(i=>{db.products.find(p=>p.id==i.id).qty-=i.qty});
+ const s={no:db.seq++,t:Date.now(),client:client.trim(),phone:cphone.trim(),seller:(user&&user!=='owner')?user.name:seller,pay,items,total:items.reduce((a,i)=>a+i.price*i.qty,0)};
+ const g=parseFloat(given)||0;if(pay==='Kach'&&g>0&&g>=s.total){s.paid=g;s.change=g-s.total}
+ {const ck=cliKey(client,cphone);if(ck){s.ckey=ck;const c=db.clients[ck]||(db.clients[ck]={key:ck,n:0,spent:0,last:0});if(client.trim())c.name=client.trim();if(digits(cphone))c.phone=cphone.trim();c.n++;c.spent+=s.total;c.last=Date.now()}}
+ db.sales.push(s);save();sheetPush(sheetEv(s));cart={};client='';cphone='';given='';render();showRc(s)}
+/* PWODWI */
+function vProd(){
+ const e=db.products.find(p=>p.id===editId)||{};
+ const rows=db.products.map(p=>`<div class="item"><div>${esc(p.name)}<small>Vant ${money(p.price)}${p.cost?' · Acha '+money(p.cost):''} · Stòk ${p.qty}</small></div><div class="row fit"><button class="btn sm alt" onclick="edit(${p.id})">Modifye</button>${delId===p.id?`<button class="btn sm bad" onclick="del(${p.id})">Konfime?</button>`:`<button class="btn sm alt" onclick="delId=${p.id};render()">Efase</button>`}</div></div>`).join('');
+ return `<div class="card"><h2>${editId?'Modifye pwodwi':'Ajoute pwodwi'}</h2>
+ <label>Non pwodwi</label><input id="pn" value="${esc(e.name||'')}">
+ <div class="row"><div><label>Pri vant (HTG)</label><input id="pp" type="number" inputmode="decimal" min="0" value="${e.price??''}"></div><div><label>Pri acha (opsyonèl)</label><input id="pc" type="number" inputmode="decimal" min="0" value="${e.cost||''}"></div></div>
+ <div class="row"><div><label>Kantite disponib</label><input id="pq" type="number" inputmode="numeric" min="0" value="${e.qty??''}"></div><div><label>Alèt stòk ba (≤)</label><input id="pm" type="number" inputmode="numeric" min="0" value="${e.min??5}"></div></div>
+ <div class="row"><button class="btn" onclick="saveP()">${editId?'Anrejistre chanjman':'Ajoute'}</button>${editId?'<button class="btn alt fit" onclick="editId=null;render()">Anile</button>':''}</div></div>
+ <div class="card"><h3>Lis pwodwi (${db.products.length})</h3>${rows||'<div class="empty">Pa gen pwodwi ankò.</div>'}</div>`}
+function edit(id){editId=id;render();scrollTo(0,0)}
+function del(id){db.products=db.products.filter(p=>p.id!==id);delete cart[id];delId=null;save();render()}
+function saveP(){
+ const name=$('pn').value.trim(),price=parseFloat($('pp').value),qty=parseInt($('pq').value);
+ if(!name||isNaN(price)||isNaN(qty)){alert('Ranpli non, pri vant ak kantite.');return}
+ const o={name,price,cost:parseFloat($('pc').value)||0,qty,min:parseInt($('pm').value)||0};
+ if(editId){Object.assign(db.products.find(p=>p.id===editId),o)}else{db.products.push({id:Date.now(),...o})}
+ editId=null;save();render()}
+/* INVENTE */
+function vInv(){
+ const val=db.products.reduce((a,p)=>a+p.qty*p.price,0),low=db.products.filter(p=>p.qty<=(p.min??5)).length;
+ const rows=db.products.map(p=>`<div class="item"><div>${esc(p.name)}<small>${money(p.price)} · Valè stòk ${money(p.qty*p.price)}</small></div><div class="row fit">${stTag(p)}<input id="r${p.id}" type="number" inputmode="numeric" min="1" placeholder="+" style="width:64px;margin:0"><button class="btn sm" onclick="restock(${p.id})">Ajoute</button></div></div>`).join('');
+ return `<div class="stats"><div class="stat"><small>Valè total stòk</small><b>${money(val)}</b></div><div class="stat"><small>Pwodwi ki ba / fini</small><b>${low}</b></div></div>
+ <div class="card"><h2>Inventè (${db.products.length} pwodwi)</h2>${rows||'<div class="empty">Pa gen pwodwi ankò.</div>'}</div>`}
+function restock(id){const n=parseInt($('r'+id).value);if(!n||n<1)return;db.products.find(p=>p.id===id).qty+=n;save();render()}
+/* RAPO */
+function vRap(){
+ const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+ const from={day:d0,week:d0-6*864e5,month:new Date(now.getFullYear(),now.getMonth(),1).getTime(),all:0}[per];
+ const SA=db.sales.filter(s=>s.t>=from&&(!rs||s.seller===rs)).sort((a,b)=>b.t-a.t),S=SA.filter(s=>!s.void);
+ const tot=S.reduce((a,s)=>a+s.total,0),n=S.reduce((a,s)=>a+s.items.reduce((x,i)=>x+i.qty,0),0);
+ const prof=S.reduce((a,s)=>a+s.items.reduce((x,i)=>x+(i.price-i.cost)*i.qty,0),0);
+ const top={};S.forEach(s=>s.items.forEach(i=>{top[i.name]=(top[i.name]||0)+i.qty}));
+ const bs={};S.forEach(s=>{if(s.seller)bs[s.seller]=(bs[s.seller]||0)+s.total});const bl=Object.entries(bs).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="item"><span>${esc(k)}</span><b>${money(v)}</b></div>`).join('');
+ const tl=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`<div class="item"><span>${esc(k)}</span><b>${v}</b></div>`).join('');
+ const sl=SA.map(s=>`<div class="item" style="${s.void?'opacity:.55':''}"><div>Reçu #${s.no}${s.void?' <span class="tag out">Anile</span>':''}${s.client?' · '+esc(s.client):''}<small>${dt(s.t)} · ${s.pay}${s.seller?' · '+esc(s.seller):''}${s.void&&s.void.why?' · '+esc(s.void.why):''}</small></div><div class="row fit"><b style="${s.void?'text-decoration:line-through':''}">${money(s.total)}</b><button class="btn sm alt" onclick="showRc(db.sales.find(x=>x.no===${s.no}))">Reçu</button></div></div>`).join('');
+ return `<div class="card"><h2>Rapò vant</h2>${db.staff.length?`<select onchange="rs=this.value;render()"><option value="">Tout vandè</option>${db.staff.map(x=>`<option ${x.name===rs?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`:''}<select onchange="per=this.value;render()">${[['day','Jodi a'],['week','7 dènye jou'],['month','Mwa sa a'],['all','Tout']].map(([k,v])=>`<option value="${k}" ${k===per?'selected':''}>${v}</option>`).join('')}</select><button class="btn" style="margin-top:8px" onclick="btPrintRep()">Imprime rapò a (Bluetooth)</button><div id="rpst" style="color:var(--mut);font-size:13px;margin-top:6px"></div></div>
+ <div class="stats"><div class="stat"><small>Total vant</small><b>${money(tot)}</b></div><div class="stat"><small>Kantite vant</small><b>${S.length}</b></div><div class="stat"><small>Atik vann</small><b>${n}</b></div><div class="stat"><small>Benefis (si pri acha antre)</small><b>${money(prof)}</b></div></div>
+ ${bl?`<div class="card"><h3>Vant pa vandè</h3>${bl}</div>`:''}<div class="card"><h3>Pwodwi ki pi vann</h3>${tl||'<div class="empty">Pa gen done.</div>'}</div>
+ <div class="card"><h3>Istwa vant</h3>${sl||'<div class="empty">Pa gen vant nan peryòd sa a.</div>'}</div>`}
+/* ADMIN */
+let unlocked=false,logoDraft=null,msg='';
+function hdr(){const c=db.cfg;$('hd').innerHTML=(c.logo?`<img src="${c.logo}" alt="" style="height:${Math.min(120,42*(c.logoSize||100)/100)}px;width:${Math.min(120,42*(c.logoSize||100)/100)}px">`:'')+`<div><b>${esc(c.name)}</b><span>${esc(c.phone||'Sistèm vant ak inventè')}</span></div>`+(user?`<button class="btn sm alt" style="margin-left:auto" onclick="logout()">Soti${user!=='owner'?' · '+esc(user.name):''}</button>`:'')}
+const logoHtml=l=>l?`<img src="${l}" alt="" style="height:64px;width:64px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:10px">`:'<div style="height:64px;width:64px;border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--mut);font-size:12px">Pa gen</div>';
+function vAdmin(){
+ const c=db.cfg;
+ if(c.pin&&!unlocked)return `<div class="card"><h2>Admin</h2><label>Kòd PIN</label><input id="pin" type="password" inputmode="numeric" placeholder="PIN" onkeydown="if(event.key==='Enter')unlock()"><button class="btn" onclick="unlock()">Antre</button></div>`;
+ const lg=logoDraft!==null?logoDraft:c.logo;
+ return `<div class="card"><h2>Konfigirasyon biznis</h2>
+ <label>Logo</label><div class="row" style="margin-bottom:8px"><div class="fit" id="lp">${logoHtml(lg)}</div><div><input id="lf" type="file" accept="image/*" onchange="pickLogo(this)" style="margin-bottom:6px"><button class="btn sm alt" onclick="logoDraft='';$('lp').innerHTML=logoHtml('')">Retire logo</button></div></div>
+ <label>Gwosè logo: <b id="lsv">${c.logoSize||100}</b>%</label><input id="cl" type="range" min="40" max="500" step="10" value="${c.logoSize||100}" oninput="prevLogo(this.value)" style="padding:0">
+ <label>Non biznis</label><input id="cn" value="${esc(c.name)}">
+ <label>Telefòn</label><input id="cp" type="tel" value="${esc(c.phone)}" placeholder="+509 …">
+ <label>Adrès</label><input id="ca" value="${esc(c.address)}">
+ <label>Mesaj anba reçu a</label><input id="cf" value="${esc(c.footer)}">
+ <label>Gwosè papye imprimant</label><select id="cw"><option value="32" ${c.paper==32?'selected':''}>58 mm</option><option value="48" ${c.paper==48?'selected':''}>80 mm</option></select>
+ <h3 style="margin-top:6px">Google Sheet</h3>
+ <label>Lyen Apps Script (URL)</label><input id="gu" value="${esc(c.sheetUrl||'')}" placeholder="https://script.google.com/macros/s/.../exec">
+ <label>Kòd sekrè (menm ak nan script la)</label><input id="gt" value="${esc(c.sheetToken||'')}">
+ <div class="row"><button class="btn alt" onclick="sheetTest()">Teste koneksyon</button><button class="btn alt" onclick="sheetAll()">Voye tout vant yo bay Sheet la</button></div><div id="gst" style="color:var(--mut);font-size:13px;margin:6px 0 4px"></div>
+ <div id="gq" style="font-size:13px;font-weight:700;margin:0 0 8px">${sheetStatText()}</div><button class="btn alt" style="margin-bottom:10px" onclick="sheetFlush()">Eseye ankò kounye a</button>
+ <label>Lang / Langue</label><select id="cg"><option value="fr" ${(c.lang||'fr')==='fr'?'selected':''}>Français</option><option value="ht" ${c.lang==='ht'?'selected':''}>Kreyòl</option></select>
+ <h3 style="margin-top:6px">Paramèt ekriti</h3>
+ <label>Gwosè ekriti sou fich / reçu a</label><select id="cs">${['Ti','Nòmal','Gwo','Trè gwo'].map((v,i)=>`<option value="${i}" ${(c.rcSize??1)==i?'selected':''}>${v}</option>`).join('')}</select>
+ <label>Gwosè ekriti aplikasyon an</label><select id="cu">${['Ti','Nòmal','Gwo','Trè gwo'].map((v,i)=>`<option value="${i}" ${(c.uiSize??1)==i?'selected':''}>${v}</option>`).join('')}</select>
+ <label>PIN pou pwoteje paj Admin (opsyonèl, kite vid pou retire l)</label><input id="cx" type="password" inputmode="numeric" value="${esc(c.pin)}">
+ <button class="btn" onclick="saveCfg()">Anrejistre</button><button class="btn alt" style="margin-top:8px" onclick="testPrint()">Teste enprimant Bluetooth</button>${msg?`<p class="ok" style="font-weight:700;margin:10px 0 0">${msg}</p>`:''}</div>
+ <div class="card"><h2>Anplwaye</h2><div class="row"><input id="sn" placeholder="Non anplwaye" style="margin:0"><input id="sc" placeholder="Kòd (4+ chif)" inputmode="numeric" style="margin:0"></div><button class="btn" style="margin-top:8px" onclick="addStaff()">Ajoute anplwaye</button><div id="stl" style="margin-top:8px">${staffHtml()}</div></div>
+ <div class="card"><h2>Anile yon fich</h2><label>Chèche pa nimewo reçu (kite vid pou wè 10 dènye yo)</label><input id="vq" type="number" inputmode="numeric" placeholder="Nimewo reçu" oninput="$('vl').innerHTML=voidHtml(this.value)"><div id="vl">${voidHtml('')}</div></div>
+ <div class="card"><h3>Sovgad</h3><button class="btn" onclick="backup()">Sove done yo (fichye)</button><label style="margin-top:10px">Retabli done yo</label><input type="file" accept=".json,application/json" onchange="restore(this)"></div>
+ <div class="card"><h3>Apèsi reçu</h3><div style="overflow-x:auto"><div id="rc2" style="background:#fff;color:#000;max-width:300px;margin:0 auto;padding:14px;font:${[11,13,16,19][c.rcSize??1]}px/1.35 'Courier New',monospace">${rcHead()}<div style="text-align:center">Reçu #1</div><hr style="border:0;border-top:1px dashed #000"><div style="text-align:center">${esc(c.footer)}</div></div></div></div>`}
+const rcHead=()=>{const c=db.cfg;return (c.logo?`<div class="c"><img src="${c.logo}" alt="" style="max-height:${60*(c.logoSize||100)/100}px;max-width:100%"></div>`:'')+`<h4>${esc(c.name)}</h4>`+(c.address?`<div class="c">${esc(c.address)}</div>`:'')+(c.phone?`<div class="c">Tel: ${esc(c.phone)}</div>`:'')};
+let sdId=null,seId=null;
+function vLogin(){return `<div class="card" style="margin-top:20px"><h2>Antre</h2><label>Kòd anplwaye oswa PIN admin</label><input id="lc" type="password" inputmode="numeric" placeholder="Kòd" onkeydown="if(event.key==='Enter')login()"><button class="btn" onclick="login()">Antre</button>${!db.cfg.pin?`<button class="btn alt" style="margin-top:8px" onclick="user='owner';render()">Antre kòm pwopriyetè (pa gen PIN admin)</button>`:''}</div>`}
+function login(){const v=$('lc').value.trim();if(!v)return;const st=db.staff.find(x=>x.code===v);
+ if(st){user=st;seller=st.name;tab='vant'}else if(db.cfg.pin&&v===db.cfg.pin){user='owner';unlocked=true}else{alert('Kòd la pa bon.');return}render()}
+function logout(){user=null;seller='';unlocked=false;cart={};client='';cphone='';tab='vant';render()}
+function saveStaff(id){const x=db.staff.find(s=>s.id===id);if(!x)return;const n=$('en').value.trim(),cd=$('ec').value.trim();
+ if(!n){alert('Ekri yon non.');return}
+ if(!/^\d{4,}$/.test(cd)){alert('Kòd la dwe gen omwen 4 chif.');return}
+ if(cd===db.cfg.pin||db.staff.some(s=>s.id!==id&&s.code===cd)){alert('Kòd sa a deja pran. Chwazi yon lòt.');return}
+ if(db.staff.some(s=>s.id!==id&&s.name.toLowerCase()===n.toLowerCase())){alert('Non sa a deja egziste.');return}
+ const old=x.name;db.sales.forEach(s=>{if(s.seller===old)s.seller=n});if(seller===old)seller=n;if(rs===old)rs=n;
+ x.name=n;x.code=cd;seId=null;save();$('stl').innerHTML=staffHtml()}
+function prevLogo(v){$('lsv').textContent=v;const a=$('lp').querySelector('img'),b=document.querySelector('#rc2 img');if(a)a.style.width=a.style.height=Math.min(200,64*v/100)+'px';if(b)b.style.maxHeight=60*v/100+'px'}
+const staffHtml=()=>db.staff.length?db.staff.map(x=>seId===x.id?`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><input id="en" value="${esc(x.name)}" placeholder="Non"><input id="ec" value="${esc(x.code||'')}" inputmode="numeric" placeholder="Kòd"><div class="row"><button class="btn" onclick="saveStaff(${x.id})">Anrejistre</button><button class="btn alt" onclick="seId=null;$('stl').innerHTML=staffHtml()">Anile</button></div></div>`:`<div class="item"><span>${esc(x.name)}<small>Kòd: ${esc(x.code||'—')}</small></span><div class="row fit"><button class="btn sm alt" onclick="seId=${x.id};sdId=null;$('stl').innerHTML=staffHtml()">Modifye</button>${sdId===x.id?`<button class="btn sm bad" onclick="delStaff(${x.id})">Konfime?</button>`:`<button class="btn sm alt" onclick="sdId=${x.id};$('stl').innerHTML=staffHtml()">Retire</button>`}</div></div>`).join(''):'<div class="empty">Pa gen anplwaye ankò.</div>';
+function addStaff(){const i=$('sn'),n=i.value.trim();if(!n)return;if(db.staff.some(x=>x.name.toLowerCase()===n.toLowerCase())){alert('Non sa a deja egziste.');return}const cd=$('sc').value.trim();if(!db.cfg.pin){alert('Mete yon PIN admin anvan ou ajoute anplwaye (Konfigirasyon biznis, PIN).');return}if(!/^\d{4,}$/.test(cd)){alert('Kòd la dwe gen omwen 4 chif.');return}if(cd===db.cfg.pin||db.staff.some(x=>x.code===cd)){alert('Kòd sa a deja pran. Chwazi yon lòt.');return}db.staff.push({id:Date.now(),name:n,code:cd});save();i.value='';$('sc').value='';$('stl').innerHTML=staffHtml()}
+function delStaff(id){db.staff=db.staff.filter(x=>x.id!==id);if(seller&&!db.staff.some(x=>x.name===seller))seller='';sdId=null;save();$('stl').innerHTML=staffHtml()}
+const voidHtml=qs=>{
+ let L=db.sales.filter(s=>!s.void).sort((a,b)=>b.no-a.no);
+ L=qs?L.filter(s=>String(s.no)===String(qs).trim()):L.slice(0,10);
+ return L.map(s=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="row"><div>Reçu #${s.no}<small style="display:block;color:var(--mut)">${dt(s.t)} · ${s.items.length} atik${s.seller?' · '+esc(s.seller):''}</small></div><b class="fit">${money(s.total)}</b>${voidId===s.no?'':`<button class="btn sm alt fit" onclick="voidId=${s.no};$('vl').innerHTML=voidHtml($('vq').value)">Anile</button>`}</div>${voidId===s.no?`<input id="vr" placeholder="Rezon (opsyonèl)" style="margin:8px 0"><div class="row"><button class="btn bad" onclick="doVoid(${s.no})">Konfime anilasyon</button><button class="btn alt" onclick="voidId=null;$('vl').innerHTML=voidHtml($('vq').value)">Retounen</button></div><small style="color:var(--mut)">Stòk la ap retounen epi vant lan pap konte nan rapò.</small>`:''}</div>`).join('')||'<div class="empty">Pa jwenn okenn fich.</div>'};
+function doVoid(no){const s=db.sales.find(x=>x.no===no);if(!s||s.void)return;
+ s.items.forEach(i=>{const p=db.products.find(x=>x.id===i.id);if(p)p.qty+=i.qty});
+ const r=$('vr');s.void={t:Date.now(),why:r?r.value.trim():''};if(s.ckey&&db.clients[s.ckey]){const c=db.clients[s.ckey];c.n=Math.max(0,(c.n||0)-1);c.spent=Math.max(0,(c.spent||0)-s.total)}
+ sheetPush({type:'void',no:shNo(s)});voidId=null;save();$('vl').innerHTML=voidHtml($('vq').value)}
+function unlock(){if($('pin').value===db.cfg.pin){unlocked=true;render()}else alert('PIN pa bon.')}
+function pickLogo(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);logoDraft=c.toDataURL('image/png');$('lp').innerHTML=logoHtml(logoDraft)};im.onerror=()=>alert('Imaj la pa ka li.');im.src=r.result};r.readAsDataURL(f)}
+function saveCfg(){const c=db.cfg;if(db.staff.length&&!$('cx').value.trim()){alert('PIN admin obligatwè lè gen anplwaye.');return}c.name=$('cn').value.trim()||'Blanco Multi_services';c.phone=$('cp').value.trim();c.address=$('ca').value.trim();c.footer=$('cf').value.trim();c.pin=$('cx').value.trim();c.paper=+$('cw').value;c.sheetUrl=$('gu').value.trim();c.sheetToken=$('gt').value.trim();const lg0=c.lang;c.lang=$('cg').value;c.rcSize=+$('cs').value;c.uiSize=+$('cu').value;c.logoSize=+$('cl').value||100;if(logoDraft!==null)c.logo=logoDraft;logoDraft=null;save();msg='Anrejistre ✔';if(lg0!==c.lang){location.reload();return}render()}
+/* BLUETOOTH */
+let curSale=null,btDev=null,btChar=null;
+const BT_SV=[0xff00,0xffe0,0xfee7,0xae30,'000018f0-0000-1000-8000-00805f9b34fb','e7810a71-73ae-499d-8c15-faa9aef0c3f2','49535343-fe7d-4ae5-8fa9-9fafd205e455'];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const asc=s=>String(s).replace(/[\u00a0\u202f]/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7e]/g,'?');
+const fm=n=>(+n||0).toFixed(2).replace(/\B(?=(\d{3})+\.)/g,',')+' HTG';
+function setSt(t){const e=$('bts');if(e)e.textContent=t}
+async function btFind(){
+ const sv=await btDev.gatt.connect();btChar=null;
+ for(const s of await sv.getPrimaryServices()){for(const c of await s.getCharacteristics()){if(c.properties.write||c.properties.writeWithoutResponse){btChar=c;return}}}
+ throw new Error('Pa jwenn kanal ekriti nan enprimant lan')}
+async function btEnsure(){
+ if(!navigator.bluetooth){alert('Navigatè sa a pa sipòte Bluetooth dirèk. Itilize Chrome sou Android.');return false}
+ try{if(btChar&&btDev.gatt.connected)return true;
+  if(!btDev)btDev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:BT_SV});
+  await btFind();return true}catch(e){btDev=null;btChar=null;alert('Koneksyon Bluetooth echwe: '+e.message);return false}}
+function logoBytes(src){return new Promise(res=>{const im=new Image();im.onload=()=>{
+ const s=(db.cfg.logoSize||100)/100,k=Math.min(192*s/im.width,96*s/im.height,(db.cfg.paper==48?576:384)/im.width),w=Math.ceil(im.width*k/8)*8,h=Math.max(1,Math.round(im.height*k)),cv=document.createElement('canvas');cv.width=w;cv.height=h;
+ const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,0,0,im.width*k,h);
+ const d=x.getImageData(0,0,w,h).data,wb=w/8,o=new Uint8Array(8+wb*h);o.set([0x1d,0x76,0x30,0,wb&255,wb>>8,h&255,h>>8]);
+ for(let y=0;y<h;y++)for(let b=0;b<w;b++){const i=(y*w+b)*4;if(d[i]*.3+d[i+1]*.59+d[i+2]*.11<140)o[8+y*wb+(b>>3)]|=0x80>>(b&7)}
+ res(o)};im.onerror=()=>res(null);im.src=src})}
+async function escpos(s){
+ const c=db.cfg,sz=c.rcSize??1,B=c.paper||32,W=sz==0?(B==48?64:42):sz==3?Math.floor(B/2):B,o=[],E=new TextEncoder(),raw=(...b)=>o.push(Uint8Array.from(b)),txt=t=>o.push(E.encode(asc(t)+'\n')),
+ lr=(a,b)=>{a=asc(a);b=asc(b);return a.slice(0,Math.max(0,W-b.length-1)).padEnd(W-b.length)+b},dash=()=>txt('-'.repeat(W)),
+ wrap=t=>{t=asc(t);for(let i=0;i<t.length;i+=W)txt(t.slice(i,i+W))};
+ raw(0x1b,0x40,0x1b,0x61,1);if(sz==0)raw(0x1b,0x4d,1);if(sz==2)raw(0x1d,0x21,1);if(sz==3)raw(0x1d,0x21,0x11);
+ if(c.logo){const l=await logoBytes(c.logo);if(l){o.push(l);txt('')}}
+ raw(0x1b,0x45,1);wrap(c.name);raw(0x1b,0x45,0);
+ if(c.address)wrap(c.address);if(c.phone)wrap('Tel: '+c.phone);
+ raw(0x1b,0x61,0);dash();txt('Recu #'+s.no);if(s.void)txt(trs('*** ANILE ***'));txt(dt(s.t));if(s.client)wrap(trs('Kliyan:')+' '+s.client);if(s.seller)wrap(trs('Vandè:')+' '+s.seller);dash();
+ const T=rcTable(s.items,W,true);if(T)T.forEach(l=>txt(l));else s.items.forEach(i=>{wrap(i.name);txt(lr(i.qty+' x '+fm(i.price),fm(i.qty*i.price)))});
+ if(!T)dash();raw(0x1b,0x45,1);txt(lr('TOTAL',fm(s.total)));raw(0x1b,0x45,0);txt(lr(trs('Peman'),trs(s.pay)));if(s.paid){txt(lr(trs('Kliyan bay:'),fm(s.paid)));txt(lr(trs('Balans:'),fm(s.change||0)))}dash();
+ raw(0x1b,0x61,1);wrap(c.footer);raw(0x1b,0x64,4,0x1d,0x56,66,0);
+ const n=o.reduce((a,x)=>a+x.length,0),r=new Uint8Array(n);let p=0;o.forEach(x=>{r.set(x,p);p+=x.length});return r}
+async function btPrint(s){s=s||curSale;if(!s)return;setSt('Konekte…');if(!(await btEnsure())){setSt('');return}
+ try{setSt('Ap imprime…');const b=await escpos(s),w=btChar.properties.writeWithoutResponse;
+  for(let i=0;i<b.length;i+=20){const ch=b.slice(i,i+20);await(w?btChar.writeValueWithoutResponse(ch):btChar.writeValue(ch));await sleep(10)}
+  setSt('Fini ✔')}catch(e){btChar=null;setSt('');alert('Enprimant lan pa reponn: '+e.message)}}
+async function rawbt(){if(!curSale)return;const b=await escpos(curSale);let t='';for(let i=0;i<b.length;i+=8192)t+=String.fromCharCode.apply(null,b.subarray(i,i+8192));location.href='intent:base64,'+btoa(t)+'#Intent;scheme=rawbt;package=ru.a_kolesnikov.rawbt;end;'}
+function repData(){
+ const now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+ const from={day:d0,week:d0-6*864e5,month:new Date(now.getFullYear(),now.getMonth(),1).getTime(),all:0}[per];
+ const S=db.sales.filter(s=>!s.void&&s.t>=from&&(!rs||s.seller===rs));
+ const top={},bs={};S.forEach(s=>{s.items.forEach(i=>{top[i.name]=(top[i.name]||0)+i.qty});if(s.seller)bs[s.seller]=(bs[s.seller]||0)+s.total});
+ return{S,tot:S.reduce((a,s)=>a+s.total,0),n:S.reduce((a,s)=>a+s.items.reduce((x,i)=>x+i.qty,0),0),prof:S.reduce((a,s)=>a+s.items.reduce((x,i)=>x+(i.price-i.cost)*i.qty,0),0),top:Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,10),bs:Object.entries(bs).sort((a,b)=>b[1]-a[1]),lbl:{day:'Jodi a',week:'7 dènye jou',month:'Mwa sa a',all:'Tout'}[per]}}
+function wrapW(t,n){const o=[];let c='';String(t).split(/\s+/).forEach(w=>{while(w.length>n){if(c){o.push(c);c=''}o.push(w.slice(0,n));w=w.slice(n)}if(!c)c=w;else if((c+' '+w).length<=n)c+=' '+w;else{o.push(c);c=w}});if(c||!o.length)o.push(c);return o}
+function rcTable(items,W,strip){
+ const A=strip?asc:(x=>String(x));
+ const cq=3,cp=Math.max(5,Math.round(W*.22)),ct=Math.max(6,Math.round(W*.26)),cn=W-cq-cp-ct-3;
+ if(cn<6)return null;
+ const fr=LG()==='fr',n0=fr?(cn>=11?'Nom produit':'Produit'):(cn>=10?'Non pwodwi':'Pwodwi');
+ const f0=n=>(+n).toLocaleString('en-US',{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});
+ const row=(a,b,c,d)=>A(a).slice(0,cn).padEnd(cn)+'|'+String(b).padStart(cq)+'|'+String(c).padStart(cp)+'|'+String(d).padStart(ct);
+ const sep='-'.repeat(cn)+'+'+'-'.repeat(cq)+'+'+'-'.repeat(cp)+'+'+'-'.repeat(ct);
+ const L=[row(n0,A(fr?'Qté':'Kte'),fr?'Prix':'Pri','Total'),sep];
+ items.forEach(i=>{const ch=wrapW(A(i.name),cn);ch.forEach((c,k)=>L.push(k?row(c,'','',''):row(c,i.qty,f0(i.price),f0(i.qty*i.price))))});
+ L.push(sep);return L}
+function rcScreen(s){const fp=[11,13,16,19][db.cfg.rcSize??1],T=rcTable(s.items,Math.floor(272/(fp*0.6)),false);
+ return T?'<pre style="margin:0;font:inherit;white-space:pre">'+esc(T.join('\n'))+'</pre>':s.items.map(i=>`<div>${esc(i.name)}</div><div class="l"><span>${i.qty} × ${money(i.price)}</span><span>${money(i.qty*i.price)}</span></div>`).join('')}
+async function escposRep(){
+ const c=db.cfg,W=c.paper||32,R=repData(),o=[],E=new TextEncoder(),raw=(...b)=>o.push(Uint8Array.from(b)),txt=t=>o.push(E.encode(asc(t)+'\n')),
+ lr=(a,b)=>{a=asc(a);b=asc(b);return a.slice(0,Math.max(0,W-b.length-1)).padEnd(W-b.length)+b},dash=()=>txt('-'.repeat(W)),
+ wrap=t=>{t=asc(t);for(let i=0;i<t.length;i+=W)txt(t.slice(i,i+W))};
+ raw(0x1b,0x40,0x1b,0x61,1,0x1b,0x45,1);wrap(c.name);wrap(trs('Rapò vant'));raw(0x1b,0x45,0);
+ wrap(trs(R.lbl));if(rs)wrap(trs('Vandè:')+' '+rs);txt(dt(Date.now()));
+ raw(0x1b,0x61,0);dash();
+ txt(lr(trs('Total vant'),fm(R.tot)));txt(lr(trs('Kantite vant'),String(R.S.length)));txt(lr(trs('Atik vann'),String(R.n)));txt(lr(trs('Benefis'),fm(R.prof)));
+ if(R.bs.length){dash();wrap(trs('Vant pa vandè'));R.bs.forEach(([k,v])=>txt(lr(k,fm(v))))}
+ if(R.top.length){dash();wrap(trs('Pwodwi ki pi vann'));R.top.forEach(([k,v])=>txt(lr(k,String(v))))}
+ dash();raw(0x1b,0x64,4,0x1d,0x56,66,0);
+ const n=o.reduce((a,x)=>a+x.length,0),r=new Uint8Array(n);let p=0;o.forEach(x=>{r.set(x,p);p+=x.length});return r}
+async function btPrintRep(){const st=t=>{const e=$('rpst');if(e)e.textContent=t};st('Konekte…');if(!(await btEnsure())){st('');return}
+ try{st('Ap imprime…');const b=await escposRep(),w=btChar.properties.writeWithoutResponse;
+  for(let i=0;i<b.length;i+=20){const ch=b.slice(i,i+20);await(w?btChar.writeValueWithoutResponse(ch):btChar.writeValue(ch));await sleep(10)}
+  st('Fini ✔')}catch(e){btChar=null;st('');alert('Enprimant lan pa reponn: '+e.message)}}
+async function saveRc(s){
+ s=s||curSale;if(!s)return;
+ const c=db.cfg,CW=34,F=15,LH=22,pad=16,L=[];
+ const add=(t,a,b)=>L.push({t:String(t),a:a||'l',b:!!b});
+ const wr=(t,a,b)=>{t=String(t);for(let i=0;i<t.length;i+=CW)add(t.slice(i,i+CW),a,b)};
+ const lr=(a,b)=>{a=String(a);b=String(b);return a.slice(0,Math.max(0,CW-b.length-1)).padEnd(CW-b.length)+b};
+ wr(c.name,'c',1);if(c.address)wr(c.address,'c');if(c.phone)wr('Tel: '+c.phone,'c');add('');
+ wr('Reçu #'+s.no+(s.void?' '+trs('(ANILE)'):''));wr(dt(s.t));
+ if(s.client)wr(trs('Kliyan:')+' '+s.client);if(s.seller)wr(trs('Vandè:')+' '+s.seller);
+ add('-'.repeat(CW));
+ const T=rcTable(s.items,CW,false);if(T)T.forEach(l=>add(l));else s.items.forEach(i=>{wr(i.name);add(lr(i.qty+' × '+fm(i.price),fm(i.qty*i.price)))});
+ if(!T)add('-'.repeat(CW));add(lr('TOTAL',fm(s.total)),'l',1);add(lr(trs('Peman'),trs(s.pay)));if(s.paid){add(lr(trs('Kliyan bay:'),fm(s.paid)));add(lr(trs('Balans:'),fm(s.change||0)))}
+ add('-'.repeat(CW));wr(c.footer,'c');
+ let lh=0,im=null;
+ if(c.logo){im=await new Promise(r=>{const g=new Image();g.onload=()=>r(g);g.onerror=()=>r(null);g.src=c.logo});if(im){im.k=Math.min(306/im.width,(60*(c.logoSize||100)/100)/im.height);lh=im.height*im.k}}
+ const W=pad*2+CW*9,H=pad*2+lh+(lh?10:0)+L.length*LH,cv=document.createElement('canvas');cv.width=W*2;cv.height=H*2;
+ const x=cv.getContext('2d');x.scale(2,2);x.fillStyle='#fff';x.fillRect(0,0,W,H);x.fillStyle='#000';x.textBaseline='top';
+ let y=pad;if(im){const w=im.width*im.k;x.drawImage(im,(W-w)/2,y,w,lh);y+=lh+10}
+ L.forEach(l=>{x.font=(l.b?'bold ':'')+F+'px "Courier New",monospace';const w=x.measureText(l.t).width;x.fillText(l.t,l.a==='c'?(W-w)/2:pad,y);y+=LH});
+ cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='recu-'+s.no+'.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);setSt('Reçu a sove.')},'image/png')}
+function backup(){const b=new Blob([JSON.stringify(db)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='blanco-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+function restore(i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!Array.isArray(o.products)||!Array.isArray(o.sales))throw 0;db=o;db.cfg=Object.assign({name:'Blanco Multi_services',phone:'',address:'',footer:'Merci, revenez nous voir !',logo:'',pin:'',paper:32},db.cfg||{});db.staff=db.staff||[];db.clients=db.clients||{};db.seq=db.seq||(db.sales.reduce((m,x)=>Math.max(m,x.no),0)+1);save();msg='';render();alert('Done yo retabli.')}catch(e){alert('Fichye a pa valid.')}};r.readAsText(f)}
+/* ===== GOOGLE SHEET (version offline) ===== */
+const SQK='blanco_sheetq';let sheetBusy=false,sheetErr='';
+const devId=(()=>{try{let d=localStorage.getItem('blanco_dev');if(!d){d='L'+Math.random().toString(36).slice(2,5).toUpperCase();localStorage.setItem('blanco_dev',d)}return d}catch(e){return 'L000'}})();
+const shNo=x=>devId+'-'+x.no;
+const sheetEv=x=>({type:'sale',no:shNo(x),t:x.t,client:x.client||'',seller:x.seller||'',pay:x.pay,total:x.total,items:x.items.map(i=>({name:i.name,qty:i.qty}))});
+const sheetQ=()=>{try{return JSON.parse(localStorage.getItem(SQK)||'[]')}catch(e){return[]}};
+const sheetSave=q=>{try{localStorage.setItem(SQK,JSON.stringify(q))}catch(e){}};
+function sheetPush(ev){if(!db.cfg.sheetUrl)return;const q=sheetQ();q.push(ev);sheetSave(q);sheetFlush()}
+function sheetMark(ev){const x=db.sales.find(s=>shNo(s)===ev.no);if(x){if(ev.type==='void')x.gsv=true;else x.gs=true;save()}}
+function sheetCall(u,t,ev){return new Promise(res=>{
+ const cb='gq'+Date.now()+Math.floor(Math.random()*1e4),sc=document.createElement('script');let done=false,tm=0;
+ const fin=r=>{if(done)return;done=true;clearTimeout(tm);sc.remove();delete window[cb];res(r)};
+ const src=u+(u.includes('?')?'&':'?')+'token='+encodeURIComponent(t)+'&data='+encodeURIComponent(JSON.stringify(ev))+'&callback='+cb;
+ if(src.length>6000){fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...ev,token:t})}).then(()=>fin({ok:true}),()=>fin({ok:false,error:'link'}));return}
+ tm=setTimeout(()=>fin({ok:false,error:'timeout'}),20000);
+ window[cb]=r=>fin(r||{ok:false,error:'empty'});
+ sc.onload=()=>setTimeout(()=>fin({ok:false,error:'link'}),400);sc.onerror=()=>fin({ok:false,error:'link'});
+ sc.src=src;document.body.appendChild(sc)})}
+async function sheetFlush(){
+ const u=db.cfg.sheetUrl,t=db.cfg.sheetToken||'';if(!u||sheetBusy||!navigator.onLine)return;sheetBusy=true;
+ try{let q=sheetQ();
+  while(q.length){
+   const ev0=q[0],r=await sheetCall(u,t,ev0);
+   if(r.ok){sheetErr='';sheetMark(ev0);q=sheetQ().slice(1);sheetSave(q);continue}
+   if(['token','sheet','spreadsheet','link','timeout','empty'].includes(r.error)){sheetErr=r.error;break}
+   sheetErr='';q=sheetQ().slice(1);sheetSave(q)
+  }
+ }catch(e){}
+ sheetBusy=false;sheetStat()}
+function sheetStatText(){const n=sheetQ().length,m={token:'Kòd sekrè a pa menm ak nan script la.',sheet:'Script la pa jwenn onglè Recettes.',spreadsheet:'Script la pa konekte ak Sheet la.',link:'Lyen an pa reponn (verifye /exec, aksè Anyone, otorizasyon).',timeout:'Lyen an pa reponn (twò dèlè).',empty:'Repons vid.'};
+ return (n?n+' vant poko nan Sheet la. ':'Tout vant yo nan Sheet la ✔')+(sheetErr?(m[sheetErr]||sheetErr):'')}
+function sheetStat(){const e=document.getElementById('gq');if(e)e.textContent=sheetStatText()}
+function sheetTest(){
+ const u=$('gu').value.trim(),t=$('gt').value.trim(),s=$('gst');
+ if(!u){s.textContent='Mete lyen an anvan.';return}
+ s.textContent='Ap teste…';
+ const cb='gs'+Date.now(),sc=document.createElement('script');let done=false;
+ const fin=m=>{if(done)return;done=true;s.textContent=m;sc.remove();delete window[cb]};
+ const bad='Lyen an pa reponn. Verifye ke li fini ak /exec epi ke aksè a se Anyone (Tout moun).';
+ window[cb]=r=>fin(r&&r.ok?'Koneksyon bon ✔':'Kòd sekrè a pa bon.');
+ sc.onload=()=>setTimeout(()=>fin('Lyen an reponn men script la pa kòrèk. Fè New version epi mete aksè a sou Anyone.'),300);
+ sc.onerror=()=>fin(bad);setTimeout(()=>fin(bad),10000);
+ sc.src=u+(u.includes('?')?'&':'?')+'token='+encodeURIComponent(t)+'&callback='+cb;
+ document.body.appendChild(sc)}
+function sheetSweep(){
+ if(!db.cfg.sheetUrl)return;
+ const q=sheetQ(),has=(ty,no)=>q.some(e=>e.type===ty&&e.no===no);let ch=false;
+ db.sales.slice().sort((a,b)=>a.t-b.t).forEach(x=>{
+  if(!x.gs&&!has('sale',shNo(x))){q.push(sheetEv(x));ch=true}
+  if(x.void&&!x.gsv&&!has('void',shNo(x))){q.push({type:'void',no:shNo(x)});ch=true}});
+ if(ch)sheetSave(q);
+ sheetFlush()}
+function sheetAll(){
+ if(!db.cfg.sheetUrl){alert('Mete lyen Google Sheet la anvan.');return}
+ const q=sheetQ();db.sales.slice().sort((a,b)=>a.t-b.t).forEach(x=>{q.push(sheetEv(x));if(x.void)q.push({type:'void',no:shNo(x)})});
+ sheetSave(q);sheetFlush();$('gst').textContent=db.sales.length+' vant ap voye.'}
+function syncUI(){const e=$('sync');if(!e)return;const n=sheetQ().length,on=n&&db.cfg.sheetUrl;
+ e.style.display=on?'block':'none';e.textContent=on?n+' vant poko nan Sheet la.':'';sheetStat()}
+window.addEventListener('online',sheetSweep);setInterval(()=>{sheetSweep();syncUI()},30000);setInterval(syncUI,5000);setTimeout(sheetSweep,3000);
+/* ===== KLIYAN ===== */
+let cliQ='',cliEd=null,cliOpen='',cliDel='';
+const digits=s=>String(s||'').replace(/\D/g,'');
+const normPh=p=>{let d=digits(p);if(d.length===8)d='509'+d;return d};
+const cliKey=(n,p)=>{const d=normPh(p);if(d.length>=8)return d;const s=String(n||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40);return s?'n_'+s:''};
+function cliFind(v){v=String(v||'').trim();if(!v)return null;const d=normPh(v),l=v.toLowerCase();return Object.values(db.clients).find(c=>(d.length>=8&&(c.key===d||normPh(c.phone)===d))||(c.name||'').toLowerCase()===l)||null}
+const clOpts=m=>Object.values(db.clients).filter(c=>m==='n'?c.name:c.phone).map(c=>m==='n'?`<option value="${esc(c.name)}">${esc(c.phone||'')}</option>`:`<option value="${esc(c.phone)}">${esc(c.name||'')}</option>`).join('');
+function cliHintText(){const c=cliFind(cphone)||cliFind(client);if(c)return 'Kliyan konnen: '+(c.n||0)+' acha · '+money(c.spent||0)+(c.last?' · '+dt(c.last):'');return (client.trim()||digits(cphone))?'Nouvo kliyan: li ap anrejistre apre vant lan.':''}
+function cliHint(){const e=document.getElementById('cih');if(e)e.textContent=cliHintText()}
+function cliPick(v){const c=cliFind(v);if(c){client=c.name||'';cphone=c.phone||'';const a=document.getElementById('cn'),b=document.getElementById('cp');if(a)a.value=client;if(b)b.value=cphone}cliHint()}
+function cliHistHtml(c){const S=db.sales.filter(s=>!s.void&&(s.ckey===c.key||(c.phone&&normPh(s.phone)===normPh(c.phone)))).sort((a,b)=>b.t-a.t).slice(0,10);
+ return '<div style="margin-top:8px;border-top:1px dashed var(--line);padding-top:6px">'+(S.map(s=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px"><span>${dt(s.t)} · ${esc(s.items.map(i=>i.name+(i.qty>1?' ×'+i.qty:'')).join(', ').slice(0,60))}</span><b>${money(s.total)}</b></div>`).join('')||'<small style="color:var(--mut)">Pa gen acha anrejistre.</small>')+'</div>'}
+function cliListHtml(){
+ const k=cliQ.trim().toLowerCase(),dk=digits(cliQ);
+ const L=Object.values(db.clients).filter(c=>!k||(c.name||'').toLowerCase().includes(k)||(dk&&digits(c.phone).includes(dk))).sort((a,b)=>(b.last||0)-(a.last||0)).slice(0,100);
+ return L.map(c=>`<div class="card"><div class="row"><div><b>${esc(c.name||c.phone)}</b><small style="display:block;color:var(--mut)">${esc(c.phone||'')}${c.note?' · '+esc(c.note):''}</small></div><div class="fit" style="text-align:right"><b>${money(c.spent||0)}</b><small style="display:block;color:var(--mut)">${c.n||0} acha</small></div></div><small style="display:block;color:var(--mut);margin-top:4px">Dènye acha: ${c.last?dt(c.last):'—'}</small>
+ <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:8px">${c.phone?`<button class="btn sm" style="background:#25d366;color:#0b3d1d;flex:0 0 auto" onclick="cliWa('${c.key}')">WhatsApp</button>`:''}<button class="btn sm" style="flex:0 0 auto" onclick="cliSell('${c.key}')">Nouvo vant</button><button class="btn sm alt" style="flex:0 0 auto" onclick="cliOpen=cliOpen==='${c.key}'?'':'${c.key}';render()">Istwa</button><button class="btn sm alt" style="flex:0 0 auto" onclick="cliEdit('${c.key}')">Modifye</button>${cliDel===c.key?`<button class="btn sm bad" style="flex:0 0 auto" onclick="cliDelete('${c.key}')">Konfime?</button>`:`<button class="btn sm alt" style="flex:0 0 auto" onclick="cliDel='${c.key}';render()">Efase</button>`}</div>${cliOpen===c.key?cliHistHtml(c):''}</div>`).join('')||'<div class="card"><div class="empty">Pa gen kliyan ankò.</div></div>'}
+function vCli(){
+ const f=cliEd;
+ const form=f?`<div class="card"><h3>${f.key?'Modifye kliyan':'Nouvo kliyan'}</h3><label>Non</label><input id="kn" value="${esc(f.name)}"><label>Telefòn</label><input id="kp" type="tel" inputmode="tel" value="${esc(f.phone)}"><label>Nòt</label><input id="kt" value="${esc(f.note||'')}"><div class="row"><button class="btn" onclick="cliSave()">Anrejistre</button><button class="btn alt" onclick="cliEd=null;render()">Anile</button></div></div>`:`<button class="btn" style="margin-bottom:12px" onclick="cliEd={key:'',name:'',phone:'',note:''};render()">+ Nouvo kliyan</button>`;
+ return `<div class="card"><h2>Kliyan (${Object.keys(db.clients).length})</h2><input id="kq" placeholder="Chèche kliyan (non oswa telefòn)" value="${esc(cliQ)}" oninput="cliQ=this.value;document.getElementById('kl').innerHTML=cliListHtml()"></div>${form}<div id="kl">${cliListHtml()}</div>`}
+function cliEdit(k){const c=db.clients[k];if(c){cliEd={key:k,name:c.name||'',phone:c.phone||'',note:c.note||''};render()}}
+function cliSell(k){const c=db.clients[k];if(!c)return;client=c.name||'';cphone=c.phone||'';go('vant')}
+function cliWa(k){const c=db.clients[k];if(!c||!c.phone)return;const fr=LG()==='fr',m=fr?'Bonjour '+(c.name||'')+', ici '+db.cfg.name+'. Merci pour votre confiance !':'Bonjou '+(c.name||'')+', se '+db.cfg.name+'. Mèsi pou konfyans ou!';window.open('https://wa.me/'+normPh(c.phone)+'?text='+encodeURIComponent(m),'_blank')}
+function cliSave(){const f=cliEd,name=$('kn').value.trim(),phone=$('kp').value.trim(),note=$('kt').value.trim();
+ if(!name&&!digits(phone)){alert('Mete yon non oswa yon telefòn.');return}
+ const nk=cliKey(name,phone),old=f.key?db.clients[f.key]:null,d={name,phone,note};
+ if(old&&f.key!==nk){db.clients[nk]={...old,...d,key:nk};delete db.clients[f.key]}
+ else{const k=f.key||nk,c=db.clients[k]||(db.clients[k]={key:k,n:0,spent:0,last:0});Object.assign(c,d)}
+ save();cliEd=null;render()}
+function cliDelete(k){delete db.clients[k];save();cliDel='';render()}
+function btSettings(){location.href='intent:#Intent;action=android.settings.BLUETOOTH_SETTINGS;end';setTimeout(()=>{if(!document.hidden)setSt('Si anyen pa louvri, ale nan Paramèt › Bluetooth manyèlman.')},1500)}
+function testPrint(){btPrint({no:0,t:Date.now(),client:'',pay:'Tès',items:[{name:'Pwodwi tès',price:100,qty:2}],total:200})}
+/* ISTORIK + WHATSAPP */
+const byNo=n=>db.sales.find(x=>x.no===n);
+function hList(){
+ const emp=user&&user!=='owner';
+ let L=db.sales.filter(s=>!emp||s.seller===user.name).sort((a,b)=>b.t-a.t);
+ const k=hq.trim().toLowerCase();
+ if(k)L=L.filter(s=>String(s.no)===k.replace('#','')||(s.client||'').toLowerCase().includes(k)||(s.seller||'').toLowerCase().includes(k));
+ if(hd)L=L.filter(s=>new Date(s.t).toLocaleDateString('en-CA')===hd);
+ const ok=L.filter(s=>!s.void),tot=ok.reduce((a,s)=>a+s.total,0);
+ const rows=L.slice(0,hlim).map(s=>`<div style="padding:10px 0;border-bottom:1px solid var(--line);${s.void?'opacity:.55':''}"><div class="row"><div>Reçu #${s.no}${s.void?' <span class="tag out">Anile</span>':''}${s.client?' · '+esc(s.client):''}<small style="display:block;color:var(--mut)">${dt(s.t)} · ${s.pay}${s.seller?' · '+esc(s.seller):''}</small></div><b class="fit" style="${s.void?'text-decoration:line-through':''}">${money(s.total)}</b></div><div class="row" style="margin-top:6px"><button class="btn sm alt" onclick="showRc(byNo(${s.no}))">Reçu / Imprimer</button></div></div>`).join('');
+ return `<div class="stats"><div class="stat"><small>Kantite fich</small><b>${ok.length}</b></div><div class="stat"><small>Total</small><b>${money(tot)}</b></div></div>`+(rows||'<div class="empty">Pa jwenn okenn vant.</div>')+(L.length>hlim?`<button class="btn alt" style="margin-top:10px" onclick="hlim+=30;$('hl').innerHTML=hList()">Wè plis</button>`:'')}
+function vHist(){return `<div class="card"><h2>Istorik vant</h2><input placeholder="Chèche (nimewo, kliyan, vandè)" value="${esc(hq)}" oninput="hq=this.value;hlim=30;$('hl').innerHTML=hList()"><label>Dat</label><div class="row"><input type="date" value="${hd}" onchange="hd=this.value;hlim=30;$('hl').innerHTML=hList()" style="margin:0"><button class="btn alt fit" onclick="hd='';hq='';render()">Efase filt</button></div></div><div class="card" id="hl">${hList()}</div>`}
+function rcText(s){const c=db.cfg,L=[];L.push('*'+c.name+'*');if(c.address)L.push(c.address);if(c.phone)L.push('Tel: '+c.phone);L.push('');L.push('Reçu #'+s.no+(s.void?' '+trs('(ANILE)'):''));L.push(dt(s.t));if(s.client)L.push(trs('Kliyan:')+' '+s.client);if(s.seller)L.push(trs('Vandè:')+' '+s.seller);L.push('------------------');L.push('```');rcTable(s.items,32,false).forEach(l=>L.push(l));L.push('```');L.push('------------------');L.push('*TOTAL: '+money(s.total)+'*');L.push(trs('Peman:')+' '+trs(s.pay));L.push('');L.push(c.footer);return L.join('\n')}
+function wa(s,ph){if(!s)return;let p=(ph!==undefined?ph:(s.phone||'')).replace(/\D/g,'');if(p.length===8)p='509'+p;
+ const u='https://wa.me/'+p+'?text='+encodeURIComponent(rcText(s));const w=window.open(u,'_blank');
+ if(!w){if(navigator.share)navigator.share({text:rcText(s)}).catch(()=>{});else alert('Pa ka louvri WhatsApp. Eseye louvri paj la dirèk nan navigatè a.')}}
+/* ESPAS WHATSAPP */
+function waList(){
+ const emp=user&&user!=='owner';
+ let L=db.sales.filter(s=>!s.void&&(!emp||s.seller===user.name)).sort((a,b)=>b.t-a.t);
+ const k=wq.trim().toLowerCase();
+ if(k)L=L.filter(s=>String(s.no)===k.replace('#','')||(s.client||'').toLowerCase().includes(k));
+ return L.slice(0,10).map(s=>`<button class="prod" style="${s.no===waNo?'background:var(--bg);font-weight:700':''}" onclick="waPick(${s.no})"><span>Reçu #${s.no}${s.client?' · '+esc(s.client):''}<small style="display:block;color:var(--mut)">${dt(s.t)}${s.seller?' · '+esc(s.seller):''}</small></span><b>${money(s.total)}</b></button>`).join('')||'<div class="empty">Pa jwenn okenn fich.</div>'}
+function waPrev(){const s=byNo(waNo);return s?`<h3 style="margin-top:10px">Mesaj la</h3><pre style="white-space:pre-wrap;font:13px/1.4 Figtree,system-ui,sans-serif;background:var(--bg);padding:10px;border-radius:10px;margin:0">${esc(rcText(s))}</pre>`:'<div class="empty">Chwazi yon fich pou w wè mesaj la.</div>'}
+function waPick(n){waNo=n;const s=byNo(n);wph=(s&&s.phone)||'';$('wl').innerHTML=waList();$('wp').value=wph;$('wv').innerHTML=waPrev()}
+function waOpen(){if(!curSale)return;waNo=curSale.no;wph=curSale.phone||'';closeRc();go('wa')}
+function waSend(){const s=byNo(waNo);if(!s){alert('Chwazi yon fich anvan.');return}s.phone=wph.trim();save();wa(s,wph)}
+function waCopy(){const s=byNo(waNo);if(!s){alert('Chwazi yon fich anvan.');return}try{navigator.clipboard.writeText(rcText(s)).then(()=>alert('Mesaj la kopye.')).catch(()=>alert('Pa ka kopye.'))}catch(e){alert('Pa ka kopye.')}}
+function vWa(){return `<div class="card"><h2>WhatsApp</h2><label>Chèche fich (nimewo oswa kliyan)</label><input value="${esc(wq)}" placeholder="Nimewo oswa non kliyan" oninput="wq=this.value;$('wl').innerHTML=waList()"><div id="wl">${waList()}</div></div>
+ <div class="card"><label>Nimewo WhatsApp kliyan</label><input id="wp" type="tel" inputmode="tel" placeholder="509 …" value="${esc(wph)}" oninput="wph=this.value"><div id="wv">${waPrev()}</div><button class="btn" style="background:#25d366;color:#0b3d1d;margin-top:10px" onclick="waSend()">Voye sou WhatsApp</button><button class="btn alt" style="margin-top:8px" onclick="waCopy()">Kopye mesaj la</button></div>`}
+/* LANGUE FRANCAISE */
+const LG=()=>db.cfg.lang||'fr';
+const PH=[['Kliyan konnen:','Client connu :'],['Nouvo kliyan: li ap anrejistre apre vant lan.','Nouveau client : il sera enregistré après la vente.'],['Mete yon non oswa yon telefòn.','Saisissez un nom ou un téléphone.'],['Chèche kliyan (non oswa telefòn)','Rechercher un client (nom ou téléphone)'],['Dènye acha:','Dernier achat :'],['Pa gen kliyan ankò.','Aucun client pour le moment.'],['Pa gen acha anrejistre.','Aucun achat enregistré.'],['Nouvo kliyan','Nouveau client'],['Modifye kliyan','Modifier le client'],['Balans pou remèt:','Monnaie à rendre :'],['Balans:','Monnaie rendue :'],['Kliyan bay (HTG)','Le client donne (HTG)'],['Balans pou remèt:','Monnaie à rendre :'],['Manke:','Il manque :'],['Kliyan bay:','Espèces reçues :'],['Balans:','Monnaie rendue :'],['vant poko nan Sheet la.','vente(s) pas encore dans le Sheet.'],['Tout vant yo nan Sheet la ✔','Toutes les ventes sont dans le Sheet ✔'],['Kòd sekrè a pa menm ak nan script la.','Le code secret n’est pas le même que dans le script.'],['Script la pa jwenn onglè Recettes.','Le script ne trouve pas l’onglet Recettes.'],['Script la pa konekte ak Sheet la.','Le script n’est pas relié au Sheet.'],['Lyen an pa reponn (verifye /exec, aksè Anyone, otorizasyon).','Le lien ne répond pas (vérifiez /exec, accès Anyone, autorisation).'],['Lyen an pa reponn (twò dèlè).','Le lien ne répond pas (délai dépassé).'],['Repons vid.','Réponse vide.'],['Eseye ankò kounye a','Réessayer maintenant'],['Lyen Apps Script (URL)','Lien Apps Script (URL)'],['Kòd sekrè (menm ak nan script la)','Code secret (le même que dans le script)'],['Teste koneksyon','Tester la connexion'],['Voye tout vant yo bay Sheet la','Envoyer toutes les ventes vers le Sheet'],['Ap teste…','Test en cours…'],['Koneksyon bon ✔','Connexion réussie ✔'],['Kòd sekrè a pa bon.','Code secret incorrect.'],['Mete lyen an anvan.','Saisissez d’abord le lien.'],['Lyen an pa reponn. Verifye ke li fini ak /exec epi ke aksè a se Anyone (Tout moun).','Le lien ne répond pas. Vérifiez qu’il finit par /exec et que l’accès est « Anyone » (Tout le monde).'],['Lyen an reponn men script la pa kòrèk. Fè New version epi mete aksè a sou Anyone.','Le lien répond mais le script n’est pas à jour. Faites « New version » et réglez l’accès sur « Anyone ».'],['Mete lyen Google Sheet la anvan.','Saisissez d’abord le lien Google Sheet (et enregistrez).'],[' vant ap voye.',' vente(s) en cours d’envoi.'],['Sistèm vant ak inventè','Système de vente et d’inventaire'],['Antre kòm pwopriyetè (pa gen PIN admin)','Entrer en tant que propriétaire (sans PIN admin)'],['Kòd anplwaye oswa PIN admin','Code employé ou PIN admin'],['Nouvo vant','Nouvelle vente'],['Chèche yon pwodwi…','Rechercher un produit…'],['Pa gen pwodwi. Ale nan "Pwodwi" pou ajoute yo.','Aucun produit. Allez dans « Produits » pour en ajouter.'],['Panye a vid. Tape sou yon pwodwi pou ajoute l.','Le panier est vide. Touchez un produit pour l’ajouter.'],['Nimewo WhatsApp kliyan (opsyonèl)','Numéro WhatsApp du client (facultatif)'],['Nimewo WhatsApp kliyan','Numéro WhatsApp du client'],['Non kliyan (opsyonèl)','Nom du client (facultatif)'],['Konfime vant','Confirmer la vente'],['Pa gen plis stòk pou ','Plus de stock pour '],['Ranpli non, pri vant ak kantite.','Remplissez le nom, le prix de vente et la quantité.'],['Modifye pwodwi','Modifier le produit'],['Ajoute pwodwi','Ajouter un produit'],['Non pwodwi','Nom du produit'],['Pri vant (HTG)','Prix de vente (HTG)'],['Pri acha (opsyonèl)','Prix d’achat (facultatif)'],['Kantite disponib','Quantité disponible'],['Alèt stòk ba (≤)','Alerte stock bas (≤)'],['Anrejistre chanjman','Enregistrer les modifications'],['Lis pwodwi','Liste des produits'],['Pa gen pwodwi ankò.','Aucun produit pour le moment.'],['Valè total stòk','Valeur totale du stock'],['Valè stòk','Valeur du stock'],['Pwodwi ki ba / fini','Produits bas / épuisés'],['Rapò vant','Rapport des ventes'],['Tout vandè','Tous les vendeurs'],['7 dènye jou','7 derniers jours'],['Mwa sa a','Ce mois-ci'],['Total vant','Total des ventes'],['Kantite vant','Nombre de ventes'],['Atik vann','Articles vendus'],['Benefis (si pri acha antre)','Bénéfice (si prix d’achat saisi)'],['Vant pa vandè','Ventes par vendeur'],['Pwodwi ki pi vann','Produits les plus vendus'],['Pa gen done.','Aucune donnée.'],['Istwa vant','Historique des ventes'],['Istorik vant','Historique des ventes'],['Pa gen vant nan periòd sa a.','Aucune vente sur cette période.'],['Chèche (nimewo, kliyan, vandè)','Rechercher (numéro, client, vendeur)'],['Efase filt','Effacer le filtre'],['Kantite fich','Nombre de fiches'],['Pa jwenn okenn vant.','Aucune vente trouvée.'],['Chèche fich (nimewo oswa kliyan)','Rechercher une fiche (numéro ou client)'],['Nimewo oswa non kliyan','Numéro ou nom du client'],['Pa jwenn okenn fich.','Aucune fiche trouvée.'],['Chwazi yon fich pou w wè mesaj la.','Choisissez une fiche pour voir le message.'],['Chwazi yon fich anvan.','Choisissez d’abord une fiche.'],['Voye sou WhatsApp','Envoyer sur WhatsApp'],['Kopye mesaj la','Copier le message'],['Mesaj la kopye.','Message copié.'],['Pa ka kopye.','Copie impossible.'],['Pa ka louvri WhatsApp. Eseye louvri paj la dirèk nan navigatè a.','Impossible d’ouvrir WhatsApp. Essayez d’ouvrir la page directement dans le navigateur.'],['Sove done yo (fichye)','Sauvegarder les données (fichier)'],['Retabli done yo','Restaurer les données'],['Done yo retabli.','Données restaurées.'],['Fichye a pa valid.','Fichier invalide.'],['Imprime rapò a (Bluetooth)','Imprimer le rapport (Bluetooth)'],['Sove reçu a (imaj)','Enregistrer le reçu (image)'],['Reçu a sove.','Reçu enregistré.'],['Paramèt Bluetooth telefòn lan','Réglages Bluetooth du téléphone'],['Si anyen pa louvri, ale nan Paramèt › Bluetooth manyèlman.','Si rien ne s’ouvre, allez dans Réglages › Bluetooth manuellement.'],['Konekte…','Connexion…'],['Ap imprime…','Impression…'],['Fini ✔','Terminé ✔'],['Kliyan:','Client :'],['Vandè:','Vendeur :'],['Peman:','Paiement :'],['*** ANILE ***','*** ANNULÉ ***'],['(ANILE)','(ANNULÉ)'],['Navigatè sa a pa sipòte Bluetooth dirèk. Itilize Chrome sou Android.','Ce navigateur ne prend pas en charge le Bluetooth direct. Utilisez Chrome sur Android.'],['Koneksyon Bluetooth echwe: ','Échec de la connexion Bluetooth : '],['Pa jwenn kanal ekriti nan enprimant lan','Canal d’écriture introuvable sur l’imprimante'],['Enprimant lan pa reponn: ','L’imprimante ne répond pas : '],['Kòd PIN','Code PIN'],['Konfigirasyon biznis','Configuration de l’entreprise'],['Retire logo','Retirer le logo'],['Gwosè logo:','Taille du logo :'],['Non biznis','Nom de l’entreprise'],['Mesaj anba reçu a','Message en bas du reçu'],['Gwosè papye imprimant','Largeur du papier de l’imprimante'],['Paramèt ekriti','Paramètres du texte'],['Gwosè ekriti sou fich / reçu a','Taille du texte sur la fiche / le reçu'],['Gwosè ekriti aplikasyon an','Taille du texte de l’application'],['PIN pou pwoteje paj Admin (opsyonèl, kite vid pou retire l)','PIN pour protéger la page Admin (facultatif, laisser vide pour le retirer)'],['Anrejistre ✔','Enregistré ✔'],['Teste enprimant Bluetooth','Tester l’imprimante Bluetooth'],['Apèsi reçu','Aperçu du reçu'],['Non anplwaye','Nom de l’employé'],['Kòd (4+ chif)','Code (4+ chiffres)'],['Ajoute anplwaye','Ajouter l’employé'],['Pa gen anplwaye ankò.','Aucun employé pour le moment.'],['Kòd:','Code :'],['Anile yon fich','Annuler une fiche'],['Chèche pa nimewo reçu (kite vid pou wè 10 dènye yo)','Rechercher par numéro de reçu (laisser vide pour voir les 10 derniers)'],['Nimewo reçu','Numéro de reçu'],['Rezon (opsyonèl)','Motif (facultatif)'],['Konfime anilasyon','Confirmer l’annulation'],['Stòk la ap retounen epi vant lan pap konte nan rapò.','Le stock sera restitué et la vente ne comptera plus dans le rapport.'],['Mete yon PIN admin anvan ou ajoute anplwaye (Konfigirasyon biznis, PIN).','Définissez d’abord un PIN admin avant d’ajouter des employés (Configuration de l’entreprise, PIN).'],['Kòd la dwe gen omwen 4 chif.','Le code doit contenir au moins 4 chiffres.'],['Kòd sa a deja pran. Chwazi yon lòt.','Ce code est déjà utilisé. Choisissez-en un autre.'],['Non sa a deja egziste.','Ce nom existe déjà.'],['Ekri yon non.','Saisissez un nom.'],['PIN pa bon.','PIN incorrect.'],['Kòd la pa bon.','Code incorrect.'],['Imaj la pa ka li.','Impossible de lire l’image.'],['PIN admin obligatwa lè gen anplwaye.','Le PIN admin est obligatoire lorsqu’il y a des employés.'],['Pwodwi tès','Produit test'],[' · Kach',' · Espèces'],[' · Kredi',' · Crédit'],['Mèsi, tounen vini ankò!','Merci, revenez nous voir !']].sort((a,b)=>b[0].length-a[0].length);
+const EX={'Kliyan':'Clients','Nòt':'Note','Istwa':'Historique','Egzak':'Exact','Vant':'Vente','Pwodwi':'Produits','Inventè':'Inventaire','Rapò':'Rapport','Istorik':'Historique','Panye':'Panier','Antre':'Entrer','Kòd':'Code','Kach':'Espèces','Kredi':'Crédit','Peman':'Paiement','Vandè':'Vendeur','Ajoute':'Ajouter','Modifye':'Modifier','Efase':'Supprimer','Retire':'Retirer','Konfime?':'Confirmer ?','Retounen':'Retour','Anrejistre':'Enregistrer','Dat':'Date','Wè plis':'Voir plus','Fini':'Épuisé','Fèmen':'Fermer','Jodi a':'Aujourd’hui','Ti':'Petit','Nòmal':'Normal','Gwo':'Grand','Trè gwo':'Très grand','Telefòn':'Téléphone','Adrès':'Adresse','Anplwaye':'Employés','Pa gen':'Aucun','Tès':'Test','Mesaj la':'Message','Benefis':'Bénéfice','Sovgad':'Sauvegarde'};
+const RG=[[/\b1 acha\b/,'1 achat'],[/(\d+) acha\b/,'$1 achats'],[/^Kliyan \((\d+)\)/,'Clients ($1)'],[/^Vant (?=\d)/,'Vente '],[/ · Acha (?=\d)/g,' · Achat '],[/ · Stòk (?=\d)/g,' · Stock '],[/^Inventè \((\d+) pwodwi\)/,'Inventaire ($1 produits)'],[/^Ba · (\d+)$/,'Bas · $1'],[/(\d+) atik\b/,'$1 articles'],[/^Soti\b/,'Déconnexion']];
+function trs(s,el){
+ if(LG()!=='fr')return s;
+ const t=String(s).trim();if(!t)return s;let o;
+ if(t==='Anile')o=(el&&el.classList&&el.classList.contains('tag'))?'Annulé':'Annuler';else if(EX[t]!==undefined)o=EX[t];
+ if(o!==undefined)return s.replace(t,o);
+ s=String(s);for(const [a,b] of RG)s=s.replace(a,b);
+ for(const [a,b] of PH)if(s.includes(a))s=s.split(a).join(b);
+ return s}
+const trNode=n=>{if(n.nodeType===3){const v=n.nodeValue,r=trs(v,n.parentElement);if(r!==v)n.nodeValue=r}else if(n.nodeType===1&&n.tagName!=='SCRIPT'&&n.tagName!=='STYLE'){if(n.hasAttribute('placeholder')){const v=n.getAttribute('placeholder'),r=trs(v);if(r!==v)n.setAttribute('placeholder',r)}n.childNodes.forEach(trNode)}};
+const _al=window.alert.bind(window);window.alert=m=>_al(trs(String(m)));
+if(LG()==='fr'){document.documentElement.lang='fr';document.title='Blanco Multi_services — Système de vente';new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(trNode))).observe(document.body,{childList:true,subtree:true});trNode(document.body)}
+/* RECU */
+function showRc(s){curSale=s;
+ $('rc').innerHTML=`${rcHead()}<div class="c">Reçu #${s.no}<br>${dt(s.t)}</div><hr>${s.void?'<div class="c"><b>*** ANILE ***</b></div><hr>':''}${s.client||s.seller?(s.client?'Kliyan: '+esc(s.client)+'<br>':'')+(s.seller?'Vandè: '+esc(s.seller):'')+'<hr>':''}`+
+ rcScreen(s)+
+ `<hr><div class="l"><b>TOTAL</b><b>${money(s.total)}</b></div><div class="l"><span>Peman</span><span>${s.pay}</span></div>${s.paid?`<div class="l"><span>Kliyan bay:</span><span>${money(s.paid)}</span></div><div class="l"><span>Balans:</span><span>${money(s.change||0)}</span></div>`:''}<hr><div class="c">${esc(db.cfg.footer)}</div>`;
+ $('rc').style.fontSize=[11,13,16,19][db.cfg.rcSize??1]+'px';$('ov').style.display='block'}
+function closeRc(){$('ov').style.display='none'}
+render();
+</script>
+</body>
+</html>
