@@ -71,7 +71,7 @@ const TABS=[['vant','Vant'],['cmd','Kòmand'],['cli','Kliyan'],['pwodwi','Pwodwi
 function go(t){tab=t;delId=null;msg='';voidId=null;sdId=null;seId=null;ed=null;if(t!=='admin'&&t!=='ctl')unlocked=false;render()}
 function render(){
  const need=!user;if(need){hdr();$('nav').innerHTML='';$('app').style.zoom=1;$('app').innerHTML=vLogin();return}
- const T=user&&user!=='owner'?TABS.filter(t=>t[0]==='vant'||t[0]==='ist'||t[0]==='wa'):TABS;if(!T.some(t=>t[0]===tab))tab='vant';
+ const T=user&&user!=='owner'?TABS.filter(t=>t[0]==='vant'||t[0]==='ist'||t[0]==='wa'||t[0]==='rap'):TABS;if(!T.some(t=>t[0]===tab))tab='vant';
  $('nav').innerHTML=T.map(([k,v])=>`<button class="${k===tab?'on':''}" onclick="go('${k}')">${v}${k==='cmd'&&nNew()?' ('+nNew()+')':''}</button>`).join('');
  hdr();$('app').style.zoom=[.9,1,1.15,1.3][db.cfg.uiSize??1];$('app').innerHTML={vant:vVant,pwodwi:vProd,inv:vInv,rap:vRap,ist:vHist,wa:vWa,ctl:vCtl,cmd:vCmd,cli:vCli,admin:vAdmin}[tab]();if(tab==='admin')setTimeout(updOff,0);
 }
@@ -116,7 +116,7 @@ function nextNo(){
  c++;try{localStorage.setItem(key,c)}catch(e){}
  return c}
 const snOf=x=>x.sn||(db.staff.slice().sort((a,b)=>a.id-b.id).findIndex(s=>s.id===x.id)+1);
-function sell(){
+async function sell(){
  if(salesClosed()){alert(closedMsg());return}
  if(busy&&Date.now()-busyT<15000)return;
  const items=Object.keys(cart).map(id=>{const p=db.products.find(x=>x.id==id);return{id:p.id,name:p.name,price:p.price,cost:p.cost||0,qty:cart[id],svc:!!p.svc}});
@@ -135,8 +135,9 @@ function sell(){
  const ck=cliKey(client,cphone);if(ck)sale.ckey=ck;
  b.set(fs.doc('sales/'+no),{...sale,ts:firebase.firestore.FieldValue.serverTimestamp()});
  if(ck){const cd={last:Date.now(),n:inc(1),spent:inc(sale.total)};if(sale.due>0)cd.due=inc(sale.due);if(client.trim())cd.name=client.trim();if(digits(cphone))cd.phone=cphone.trim();b.set(fs.doc('clients/'+ck),cd,{merge:true})}
- if(user!=='owner')b.set(fs.doc('staff/'+user.id),{n:c},{merge:true});
- b.commit().catch(e=>alert(e.message));
+ const cntP=(user!=='owner')?fs.doc('staff/'+user.id).update({n:c}).catch(()=>{}):null;
+ try{await b.commit()}catch(e){alert(e.message);busy=false;return}
+ if(cntP)await cntP;
  sheetPush({type:'sale',no,t:sale.t,client:sale.client,seller:sale.seller,pay,total:sale.total,items:items.map(i=>({name:i.name,qty:i.qty}))});
  cart={};client='';cphone='';given='';busy=false;render();showRc(sale)}
 /* PWODWI */
@@ -176,7 +177,7 @@ function vRap(){
  const bs={};S.forEach(s=>{if(s.seller)bs[s.seller]=(bs[s.seller]||0)+s.total});const bl=Object.entries(bs).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="item"><span>${esc(k)}</span><b>${money(v)}</b></div>`).join('');
  const tl=Object.entries(top).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([k,v])=>`<div class="item"><span>${esc(k)}</span><b>${v}</b></div>`).join('');
  const sl=SA.map(s=>`<div class="item" style="${s.void?'opacity:.55':''}"><div>Reçu #${s.no}${s.void?' <span class="tag out">Anile</span>':''}${s.client?' · '+esc(s.client):''}<small>${dt(s.t)} · ${s.pay}${s.seller?' · '+esc(s.seller):''}${s.void&&s.void.why?' · '+esc(s.void.why):''}</small></div><div class="row fit"><b style="${s.void?'text-decoration:line-through':''}">${money(s.total)}</b><button class="btn sm alt" onclick="showRc(db.sales.find(x=>x.no==='${s.no}'))">Reçu</button></div></div>`).join('');
- return `<div class="card"><h2>Rapò vant</h2>${db.staff.length?`<select onchange="rs=this.value;render()"><option value="">Tout vandè</option>${db.staff.map(x=>`<option ${x.name===rs?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`:''}<select onchange="per=this.value;render()">${[['day','Jodi a'],['week','7 dènye jou'],['month','Mwa sa a'],['all','Tout']].map(([k,v])=>`<option value="${k}" ${k===per?'selected':''}>${v}</option>`).join('')}</select><button class="btn" style="margin-top:8px" onclick="btPrintRep()">Imprime rapò a (Bluetooth)</button><div id="rpst" style="color:var(--mut);font-size:13px;margin-top:6px"></div></div>
+ return `<div class="card"><h2>${user&&user!=='owner'?'Rapò pa mwen':'Rapò vant'}</h2>${db.staff.length&&user==='owner'?`<select onchange="rs=this.value;render()"><option value="">Tout vandè</option>${db.staff.map(x=>`<option ${x.name===rs?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`:''}<select onchange="per=this.value;render()">${[['day','Jodi a'],['week','7 dènye jou'],['month','Mwa sa a'],['all','Tout']].map(([k,v])=>`<option value="${k}" ${k===per?'selected':''}>${v}</option>`).join('')}</select><button class="btn" style="margin-top:8px" onclick="btPrintRep()">Imprime rapò a (Bluetooth)</button><div id="rpst" style="color:var(--mut);font-size:13px;margin-top:6px"></div></div>
  <div class="stats"><div class="stat"><small>Total vant</small><b>${money(tot)}</b></div><div class="stat"><small>Kantite vant</small><b>${S.length}</b></div><div class="stat"><small>Atik vann</small><b>${n}</b></div><div class="stat"><small>Benefis (si pri acha antre)</small><b>${money(prof)}</b></div></div>
  ${bl?`<div class="card"><h3>Vant pa vandè</h3>${bl}</div>`:''}<div class="card"><h3>Pwodwi ki pi vann</h3>${tl||'<div class="empty">Pa gen done.</div>'}</div>
  <div class="card"><h3>Istwa vant</h3>${sl||'<div class="empty">Pa gen vant nan peryòd sa a.</div>'}</div>`}
@@ -514,7 +515,7 @@ function resolveUser(){
  if(role==='owner'){user='owner';startData();render();return}
  const st=db.staff.find(x=>x.id===sessInfo.staffId);
  if(!st||st.active===false){authMsg=!st?'Kont ou pa egziste ankò.':'Aksè ou bloke.';doSignOut();return}
- user=st;seller=st.name;tab='vant';startData();render()}
+ user=st;seller=st.name;rs='';tab='vant';startData();render()}
 function doSignOut(){try{firebase.auth().signOut().catch(()=>{})}catch(e){}}
 async function resetPw(){const n=$('rpn'),say=(m,ok)=>{if(n){n.style.color=ok?'var(--ok)':'var(--bad)';n.textContent=m}};
  const e=(($('le')||{}).value||'').trim();if(!e){say('Ekri imèl ou anvan.');return}
